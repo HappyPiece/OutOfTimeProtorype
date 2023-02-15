@@ -22,6 +22,21 @@ namespace OutOfTimePrototype.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("ClassCluster", b =>
+                {
+                    b.Property<Guid>("ClassesId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ClustersNumber")
+                        .HasColumnType("text");
+
+                    b.HasKey("ClassesId", "ClustersNumber");
+
+                    b.HasIndex("ClustersNumber");
+
+                    b.ToTable("ClassCluster");
+                });
+
             modelBuilder.Entity("OutOfTimePrototype.DAL.Models.CampusBuilding", b =>
                 {
                     b.Property<Guid>("Id")
@@ -47,10 +62,6 @@ namespace OutOfTimePrototype.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ClusterNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
@@ -67,8 +78,6 @@ namespace OutOfTimePrototype.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ClusterNumber");
 
                     b.HasIndex("EducatorId");
 
@@ -195,55 +204,64 @@ namespace OutOfTimePrototype.Migrations
                         new
                         {
                             Number = 1,
-                            EndTime = new DateTime(2023, 2, 14, 3, 20, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 1, 45, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 15, 3, 20, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 15, 1, 45, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 2,
-                            EndTime = new DateTime(2023, 2, 14, 5, 10, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 3, 35, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 15, 5, 10, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 15, 3, 35, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 3,
-                            EndTime = new DateTime(2023, 2, 14, 7, 0, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 5, 25, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 15, 7, 0, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 15, 5, 25, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 4,
-                            EndTime = new DateTime(2023, 2, 14, 9, 20, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 7, 45, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 15, 9, 20, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 15, 7, 45, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 5,
-                            EndTime = new DateTime(2023, 2, 14, 11, 10, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 9, 35, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 15, 11, 10, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 15, 9, 35, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 6,
-                            EndTime = new DateTime(2023, 2, 14, 13, 0, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 11, 25, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 15, 13, 0, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 15, 11, 25, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 7,
-                            EndTime = new DateTime(2023, 2, 14, 14, 50, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 13, 15, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 15, 14, 50, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 15, 13, 15, 0, 0, DateTimeKind.Utc)
                         });
+                });
+
+            modelBuilder.Entity("ClassCluster", b =>
+                {
+                    b.HasOne("OutOfTimePrototype.DAL.Models.Class", null)
+                        .WithMany()
+                        .HasForeignKey("ClassesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OutOfTimePrototype.DAL.Models.Cluster", null)
+                        .WithMany()
+                        .HasForeignKey("ClustersNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("OutOfTimePrototype.DAL.Models.Class", b =>
                 {
-                    b.HasOne("OutOfTimePrototype.DAL.Models.Cluster", "Cluster")
-                        .WithMany()
-                        .HasForeignKey("ClusterNumber")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("OutOfTimePrototype.DAL.Models.Educator", "Educator")
                         .WithMany()
                         .HasForeignKey("EducatorId");
@@ -261,8 +279,6 @@ namespace OutOfTimePrototype.Migrations
                     b.HasOne("OutOfTimePrototype.DAL.Models.ClassType", "Type")
                         .WithMany()
                         .HasForeignKey("TypeName");
-
-                    b.Navigation("Cluster");
 
                     b.Navigation("Educator");
 
