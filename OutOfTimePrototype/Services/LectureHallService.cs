@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.DTO;
+using OutOfTimePrototype.Exceptions;
 
 namespace OutOfTimePrototype.Services;
 
@@ -17,26 +18,21 @@ public class LectureHallService : ILectureHallService
         _mapper = mapper;
     }
 
-    private async Task<bool> IsLectureHallExists(Guid id)
-    {
-        return await _outOfTimeDbContext.LectureHalls.AnyAsync(hall => hall.Id == id);
-    }
-
     private async Task<bool> IsLectureHallExists(string name, Guid hostBuildingId)
     {
         return await _outOfTimeDbContext.LectureHalls.AnyAsync(hall =>
             hall.Name == name && hall.HostBuilding.Id == hostBuildingId);
     }
 
-    public async Task<List<LectureHall?>> GetFreeLectureHalls(int timeSlotNumber, DateTime date)
+    public async Task<List<LectureHall>> GetFreeLectureHalls(int timeSlotNumber, DateTime date)
     {
         var occupiedLectureHalls = await _outOfTimeDbContext.Classes.Where(@class =>
                 @class.TimeSlot.Number == timeSlotNumber &&
                 DateOnly.FromDateTime(@class.Date) == DateOnly.FromDateTime(date))
             .Select(@class => @class.LectureHall)
             .ToListAsync();
-        // WARNING: .Except() may be less performant than .Where()
-        return await _outOfTimeDbContext.LectureHalls.Except(occupiedLectureHalls).ToListAsync();
+
+        return await _outOfTimeDbContext.LectureHalls.Where(hall => !occupiedLectureHalls.Contains(hall)).ToListAsync();
     }
 
     public async Task<List<LectureHall>> GetLectureHallsByBuilding(Guid hostBuildingId)
@@ -45,25 +41,26 @@ public class LectureHallService : ILectureHallService
             .ToListAsync();
     }
 
-    public async Task Create(LectureHallDTO hallDto)
+    public async Task CreateLectureHall(LectureHallDTO hallDto)
     {
         if (await IsLectureHallExists(hallDto.Name, hallDto.HostBuildingId))
         {
-            throw new NotImplementedException();
+            throw new AlreadyExistsException(
+                $"Lecture hall with name: '{hallDto.Name}' and building id: '{hallDto.HostBuildingId}' already exists");
         }
 
         var entity = _mapper.Map<LectureHall>(hallDto);
         _outOfTimeDbContext.LectureHalls.Add(entity);
         await _outOfTimeDbContext.SaveChangesAsync();
     }
-
-    public async Task Update(LectureHallUpdateModel hallUpdateModel)
+    
+    public async Task EditLectureHall(Guid id, LectureHallUpdateModel hallUpdateModel)
     {
-        var dbEntity = await _outOfTimeDbContext.LectureHalls.FindAsync(hallUpdateModel.Id);
-        
+        var dbEntity = await _outOfTimeDbContext.LectureHalls.FindAsync(id);
+
         if (dbEntity is null)
         {
-            throw new NotImplementedException();
+            throw new RecordNotFoundException($"Lecture hall with id: '{id}' do not exists");
         }
 
         var updatedEntity = _mapper.Map(hallUpdateModel, dbEntity);
@@ -71,12 +68,3 @@ public class LectureHallService : ILectureHallService
         await _outOfTimeDbContext.SaveChangesAsync();
     }
 }
-
-/**
- * select *
- * from LectureHall
- * except
- * select LectureHallId
- * from Class
- * where TimeSlotNumber = 1 and Date = 12.02.2023
- */
