@@ -10,7 +10,7 @@ namespace OutOfTimePrototype.DTO
         public int TimeSlotNumber { get; set; }
 
         [Required]
-        public string ClusterNumber { get; set; }
+        public string[] ClusterNumbers { get; set; }
 
         [Required]
         public DateTime Date { get; set; }

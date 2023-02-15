@@ -12,36 +12,48 @@ namespace OutOfTimePrototype.Services
     public class ClassService : IClassService
     {
         private readonly OutOfTimeDbContext _outOfTimeDbContext;
-        
+
         public ClassService(OutOfTimeDbContext outOfTimeDbContext)
         {
             _outOfTimeDbContext = outOfTimeDbContext;
         }
+
         public async Task<ClassCreationResult> TryCreateClass(ClassDTO classDTO)
         {
+            // TODO: maybe check for emptiness is needed
+            var clusters = await _outOfTimeDbContext.Clusters
+                .Where(c => classDTO.ClusterNumbers.Contains(c.Number))
+                .ToListAsync();
+            var educator = await _outOfTimeDbContext.Educators.SingleOrDefaultAsync(e => e.Id == classDTO.EducatorId);
+
             var newClass = new Class
             {
-                Cluster = await _outOfTimeDbContext.Clusters.SingleOrDefaultAsync(x => x.Number == classDTO.ClusterNumber),
+                Clusters = clusters,
                 Date = classDTO.Date,
-                Educator = await _outOfTimeDbContext.Educators.SingleOrDefaultAsync(x => x.Id == classDTO.EducatorId),
-
+                Educator = educator
             };
 
             // selects classes that share date and time slot with that being created
             var concurrentClasses = _outOfTimeDbContext.Classes.Where(x => x.TimeSlot.Number == newClass.TimeSlot.Number
-            && DateOnly.FromDateTime(x.Date) == DateOnly.FromDateTime(newClass.Date));
+                                                                           && DateOnly.FromDateTime(x.Date) ==
+                                                                           DateOnly.FromDateTime(newClass.Date));
 
-            if (await concurrentClasses.AnyAsync(x => x.Cluster.Number == newClass.Cluster.Number))
+            // checks if any of the concurrent classes has any cluster that intersects with newClass clusters
+            if (await concurrentClasses.AnyAsync(cClass =>
+                    cClass.Clusters.Any(cluster => newClass.Clusters.Contains(cluster))))
             {
                 return new ClassCreationResult(ClassCreationStatus.ClusterOccupied);
             }
 
-            if ((newClass.Educator is not null) ? await concurrentClasses.Where(x => x.Educator != null).AnyAsync(x => x.Educator!.Id == newClass.Educator.Id) : false)
+            // TODO: educator cannot be null so check for it above
+            if (newClass.Educator is not null &&
+                await concurrentClasses.AnyAsync(x => x.Educator != null && x.Educator.Id == newClass.Educator.Id))
             {
                 return new ClassCreationResult(ClassCreationStatus.EducatorOccupied);
             }
 
-            if ((newClass.LectureHall is not null) ? await concurrentClasses.Where(x => x.LectureHall != null).AnyAsync(x => x.LectureHall!.Id == newClass.LectureHall.Id) : false)
+            if (newClass.LectureHall is not null && await concurrentClasses
+                    .AnyAsync(x => x.LectureHall != null && x.LectureHall.Id == newClass.LectureHall.Id))
             {
                 return new ClassCreationResult(ClassCreationStatus.EducatorOccupied);
             }
