@@ -5,19 +5,19 @@ namespace OutOfTimePrototype.DAL
 {
     public class OutOfTimeDbContext : DbContext
     {
-        public DbSet<ClassType> ClassTypes { get; set; }
+        public DbSet<ClassType> ClassTypes { get; set; } = default!;
 
-        public DbSet<TimeSlot> TimeSlots { get; set; }
+        public DbSet<TimeSlot> TimeSlots { get; set; } = default!;
 
-        public DbSet<Class> Classes { get; set; }
+        public DbSet<Class> Classes { get; set; } = default!;
 
-        public DbSet<Educator> Educators { get; set; }
+        public DbSet<Educator> Educators { get; set; } = default!;
 
-        public DbSet<LectureHall> LectureHalls { get; set; }
+        public DbSet<LectureHall> LectureHalls { get; set; } = default!;
 
-        public DbSet<CampusBuilding> CampusBuildings { get; set; }
+        public DbSet<CampusBuilding> CampusBuildings { get; set; } = default!;
 
-        public DbSet<Cluster> Clusters { get; set; }
+        public DbSet<Cluster> Clusters { get; set; } = default!;
 
         public OutOfTimeDbContext(DbContextOptions options) : base(options) { }
 
@@ -27,7 +27,12 @@ namespace OutOfTimePrototype.DAL
             modelBuilder.Entity<TimeSlot>().HasKey(x => x.Number);
             modelBuilder.Entity<Cluster>().HasKey(x => x.Number);
 
-            modelBuilder.Entity<LectureHall>().HasOne(x => x.HostBuilding).WithMany(x => x.LectureHalls);
+            modelBuilder.Entity<Class>()
+                .HasMany(@class => @class.Clusters)
+                .WithMany(cluster => cluster.Classes);
+            modelBuilder.Entity<LectureHall>()
+                .HasOne(x => x.HostBuilding)
+                .WithMany(x => x.LectureHalls);
 
             //modelBuilder.Entity<Class>().HasOne(x => new { x.TimeSlot, x.Cluster });
 
