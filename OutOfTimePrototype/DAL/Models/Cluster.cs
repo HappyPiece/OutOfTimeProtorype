@@ -1,8 +1,8 @@
-﻿namespace OutOfTimePrototype.DAL.Models;
-
-public class Cluster
+﻿namespace OutOfTimePrototype.DAL.Models
 {
-    public List<Class> Classes = new();
-    public string Number { get; set; }
-    public Cluster? SuperCluster { get; set; }
+    public class Cluster
+    {
+        public string Number { get; set; }
+        public Cluster? SuperCluster { get; set; } = null;
+    }
 }
