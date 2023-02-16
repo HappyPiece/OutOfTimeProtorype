@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
@@ -112,9 +111,9 @@ namespace OutOfTimePrototype.Controllers
         {
             var clusters = await _outOfTimeDbContext.Clusters.ToListAsync();
 
-            var responce = clusters.Select(x => new ClusterDTO { Number = x.Number, SuperClusterNumber = x.SuperCluster?.Number });
+            var response = clusters.Select(x => new ClusterDTO { Number = x.Number, SuperClusterNumber = x.SuperCluster?.Number });
 
-            return Ok(responce);
+            return Ok(response);
         }
 
         [HttpGet, Route("{number}")]
