@@ -8,7 +8,7 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<LectureHallDTO, LectureHall>().IgnoreNullProperties();
+        CreateMap<LectureHallDto, LectureHall>().IgnoreNullProperties();
         CreateMap<LectureHallUpdateModel, LectureHall>().IgnoreNullProperties();
     }
 }

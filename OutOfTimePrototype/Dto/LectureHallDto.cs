@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace OutOfTimePrototype.DTO;
 
-public class LectureHallDTO
+public class LectureHallDto
 {
     [Required] public string Name { get; set; }
     [Required] public Guid HostBuildingId { get; set; }

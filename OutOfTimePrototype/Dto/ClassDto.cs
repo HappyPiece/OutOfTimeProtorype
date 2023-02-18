@@ -2,7 +2,7 @@
 
 namespace OutOfTimePrototype.DTO
 {
-    public class ClassDTO
+    public class ClassDto
     {
         public Guid? Id { get; set; }
 

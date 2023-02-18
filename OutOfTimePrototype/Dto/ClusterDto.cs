@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace OutOfTimePrototype.DTO
 {
-    public class ClusterDTO
+    public class ClusterDto
     {
         [Required]
         public string Number { get; set; }
