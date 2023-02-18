@@ -26,7 +26,7 @@ public class LectureHallController : ControllerBase
     public async Task<IActionResult> GetFreeHalls([FromQuery] int timeSlotNumber, [FromQuery] DateTime date)
     {
         var result = new
-            { freeHalls = await _lectureHallService.GetFreeLectureHalls(timeSlotNumber, date) };
+            { freeHalls = await _lectureHallService.GetAllUnoccupied(timeSlotNumber, date) };
 
         return Ok(result);
     }
@@ -39,28 +39,22 @@ public class LectureHallController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetHallsByBuildingId([FromQuery] Guid buildingId)
     {
-        var result = await _lectureHallService.GetLectureHallsByBuilding(buildingId);
+        var result = await _lectureHallService.GetByBuilding(buildingId);
 
         return Ok(result);
     }
 
     [HttpPost("create")]
-    public async Task<IActionResult> CreateHall(LectureHallDTO lectureHallDto)
+    public async Task<IActionResult> CreateHall(LectureHallDto lectureHallDto)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        try
-        {
-            await _lectureHallService.CreateLectureHall(lectureHallDto);
-            return NoContent();
-        }
-        catch (AlreadyExistsException e)
-        {
-            return Conflict(e.Message);
-        }
+        var r = await _lectureHallService.CreateLectureHall(lectureHallDto);
+        if (r is { IsFailed: true, Error: AlreadyExistsException }) return Conflict(r.Error.Message);
+        return NoContent();
     }
 
     [HttpPut("update")]
@@ -71,14 +65,8 @@ public class LectureHallController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        try
-        {
-            await _lectureHallService.EditLectureHall(id, hallUpdateModel);
-            return NoContent();
-        }
-        catch (RecordNotFoundException e)
-        {
-            return NotFound(e.Message);
-        }
+        var r = await _lectureHallService.EditLectureHall(id, hallUpdateModel);
+        if (r is { IsFailed: true, Error: RecordNotFoundException }) return NotFound(r.Error.Message);
+        return NoContent();
     }
 }

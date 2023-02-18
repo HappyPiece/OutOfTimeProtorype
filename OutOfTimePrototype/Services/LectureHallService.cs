@@ -4,13 +4,14 @@ using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.DTO;
 using OutOfTimePrototype.Exceptions;
+using OutOfTimePrototype.Utilities;
 
 namespace OutOfTimePrototype.Services;
 
 public class LectureHallService : ILectureHallService
 {
-    private readonly OutOfTimeDbContext _outOfTimeDbContext;
     private readonly IMapper _mapper;
+    private readonly OutOfTimeDbContext _outOfTimeDbContext;
 
     public LectureHallService(OutOfTimeDbContext outOfTimeDbContext, IMapper mapper)
     {
@@ -18,13 +19,7 @@ public class LectureHallService : ILectureHallService
         _mapper = mapper;
     }
 
-    private async Task<bool> IsLectureHallExists(string name, Guid hostBuildingId)
-    {
-        return await _outOfTimeDbContext.LectureHalls.AnyAsync(hall =>
-            hall.Name == name && hall.HostBuilding.Id == hostBuildingId);
-    }
-
-    public async Task<List<LectureHall>> GetFreeLectureHalls(int timeSlotNumber, DateTime date)
+    public async Task<List<LectureHall>> GetAllUnoccupied(int timeSlotNumber, DateTime date)
     {
         var occupiedLectureHalls = await _outOfTimeDbContext.Classes.Where(@class =>
                 @class.TimeSlot.Number == timeSlotNumber &&
@@ -35,36 +30,48 @@ public class LectureHallService : ILectureHallService
         return await _outOfTimeDbContext.LectureHalls.Where(hall => !occupiedLectureHalls.Contains(hall)).ToListAsync();
     }
 
-    public async Task<List<LectureHall>> GetLectureHallsByBuilding(Guid hostBuildingId)
+    public async Task<List<LectureHall>> GetByBuilding(Guid hostBuildingId)
     {
         return await _outOfTimeDbContext.LectureHalls.Where(hall => hall.HostBuilding.Id == hostBuildingId)
             .ToListAsync();
     }
 
-    public async Task CreateLectureHall(LectureHallDTO hallDto)
+    public async Task<Result> CreateLectureHall(LectureHallDto hallDto)
     {
         if (await IsLectureHallExists(hallDto.Name, hallDto.HostBuildingId))
         {
-            throw new AlreadyExistsException(
+            var e = new AlreadyExistsException(
                 $"Lecture hall with name: '{hallDto.Name}' and building id: '{hallDto.HostBuildingId}' already exists");
+            return Result.Fail(e);
         }
 
         var entity = _mapper.Map<LectureHall>(hallDto);
         _outOfTimeDbContext.LectureHalls.Add(entity);
         await _outOfTimeDbContext.SaveChangesAsync();
+
+        return Result.Success();
     }
-    
-    public async Task EditLectureHall(Guid id, LectureHallUpdateModel hallUpdateModel)
+
+    public async Task<Result> EditLectureHall(Guid id, LectureHallUpdateModel hallUpdateModel)
     {
         var dbEntity = await _outOfTimeDbContext.LectureHalls.FindAsync(id);
 
         if (dbEntity is null)
         {
-            throw new RecordNotFoundException($"Lecture hall with id: '{id}' do not exists");
+            var e = new RecordNotFoundException($"Lecture hall with id: '{id}' do not exists");
+            return Result.Fail(e);
         }
 
         var updatedEntity = _mapper.Map(hallUpdateModel, dbEntity);
         _outOfTimeDbContext.LectureHalls.Add(updatedEntity);
         await _outOfTimeDbContext.SaveChangesAsync();
+
+        return Result.Success();
+    }
+
+    private async Task<bool> IsLectureHallExists(string name, Guid hostBuildingId)
+    {
+        return await _outOfTimeDbContext.LectureHalls.AnyAsync(hall =>
+            hall.Name == name && hall.HostBuilding.Id == hostBuildingId);
     }
 }
