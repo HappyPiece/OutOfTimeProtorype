@@ -33,7 +33,9 @@ var mapper = config.CreateMapper();
 services.AddSingleton(mapper);
 
 // Configure DI for Services
+// services.AddScoped<IClassService, ClassService>();
 services.AddScoped<ILectureHallService, LectureHallService>();
+services.AddScoped<IEducatorService, EducatorService>();
 
 var app = builder.Build();
 

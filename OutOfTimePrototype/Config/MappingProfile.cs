@@ -12,6 +12,7 @@ public class MappingProfile : Profile
     {
         CreateMap<LectureHallDto, LectureHall>().IgnoreNullProperties().IgnoreProperty(dto => dto.Id);
         CreateMap<LectureHallUpdateDto, LectureHall>().IgnoreNullProperties();
+        CreateMap<EducatorDto, Educator>().IgnoreNullProperties().IgnoreProperty(dto => dto.Id);
     }
 }
 
@@ -27,10 +28,10 @@ public static class MappingExpressionExtension
     }
 
     public static IMappingExpression<TSource, TDestination> IgnoreProperty<TSource, TDestination>(
-        this IMappingExpression<TSource, TDestination> expression, Expression<Func<TSource, object>> getProp
+        this IMappingExpression<TSource, TDestination> expression, Expression<Func<TDestination, object>> getProp
     )
     {
-        expression.ForSourceMember(getProp, configurationExpression => configurationExpression.DoNotValidate());
+        expression.ForMember(getProp, configurationExpression => configurationExpression.Ignore());
         return expression;
     }
 }

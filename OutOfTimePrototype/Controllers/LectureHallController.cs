@@ -26,7 +26,7 @@ public class LectureHallController : ControllerBase
     public async Task<IActionResult> GetFreeHalls([FromQuery] int timeSlotNumber, [FromQuery] DateTime date)
     {
         var result = new
-            { freeHalls = await _lectureHallService.GetAllUnoccupied(timeSlotNumber, date) };
+            { unoccupiedHalls = await _lectureHallService.GetAllUnoccupied(timeSlotNumber, date) };
 
         return Ok(result);
     }
