@@ -58,14 +58,14 @@ public class LectureHallController : ControllerBase
     }
 
     [HttpPut("update")]
-    public async Task<IActionResult> EditHall([FromQuery] Guid id, LectureHallUpdateModel hallUpdateModel)
+    public async Task<IActionResult> EditHall([FromQuery] Guid id, LectureHallUpdateDto hallUpdateDto)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var r = await _lectureHallService.EditLectureHall(id, hallUpdateModel);
+        var r = await _lectureHallService.EditLectureHall(id, hallUpdateDto);
         if (r is { IsFailed: true, Error: RecordNotFoundException }) return NotFound(r.Error.Message);
         return NoContent();
     }

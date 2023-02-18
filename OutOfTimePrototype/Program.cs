@@ -10,7 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 
 // Add services to the container.
-services.AddControllers().AddJsonOptions(options => {
+services.AddControllers().AddJsonOptions(options =>
+{
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -21,7 +22,10 @@ services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 services.AddScoped<IClassService, ClassService>();
 
-services.AddDbContext<OutOfTimeDbContext>(options => { options.UseNpgsql(builder.Configuration.GetConnectionString("OutOfTimeDb")); });
+services.AddDbContext<OutOfTimeDbContext>(options =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("OutOfTimeDb"));
+});
 
 // AutoMapper configuration
 var config = new MapperConfiguration(cfg => { cfg.AddProfile<MappingProfile>(); });

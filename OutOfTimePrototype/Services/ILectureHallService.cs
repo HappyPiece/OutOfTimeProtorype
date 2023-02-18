@@ -9,5 +9,5 @@ public interface ILectureHallService
     Task<List<LectureHall>> GetAllUnoccupied(int timeSlotNumber, DateTime date);
     Task<List<LectureHall>> GetByBuilding(Guid hostBuildingId);
     Task<Result> CreateLectureHall(LectureHallDto hallDto);
-    Task<Result> EditLectureHall(Guid id, LectureHallUpdateModel hallUpdateModel);
+    Task<Result> EditLectureHall(Guid id, LectureHallUpdateDto hallUpdateModel);
 }

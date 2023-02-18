@@ -30,6 +30,7 @@ public class LectureHallService : ILectureHallService
         return await _outOfTimeDbContext.LectureHalls.Where(hall => !occupiedLectureHalls.Contains(hall)).ToListAsync();
     }
 
+    // TODO: maybe need to return LectureHallDto
     public async Task<List<LectureHall>> GetByBuilding(Guid hostBuildingId)
     {
         return await _outOfTimeDbContext.LectureHalls.Where(hall => hall.HostBuilding.Id == hostBuildingId)
@@ -52,7 +53,7 @@ public class LectureHallService : ILectureHallService
         return Result.Success();
     }
 
-    public async Task<Result> EditLectureHall(Guid id, LectureHallUpdateModel hallUpdateModel)
+    public async Task<Result> EditLectureHall(Guid id, LectureHallUpdateDto hallUpdateModel)
     {
         var dbEntity = await _outOfTimeDbContext.LectureHalls.FindAsync(id);
 
