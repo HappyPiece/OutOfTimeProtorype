@@ -6,6 +6,6 @@ namespace OutOfTimePrototype.Services
 {
     public interface IClassService
     {
-        Task<ClassCreationResult> TryCreateClass(ClassDTO classDTO);
+        Task<ClassCreationResult> TryCreateClass(ClassDto classDTO);
     }
 }

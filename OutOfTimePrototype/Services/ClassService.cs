@@ -2,7 +2,6 @@
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.DTO;
-using OutOfTimePrototype.Utilities;
 using static OutOfTimePrototype.Utilities.ClassUtilities;
 using static OutOfTimePrototype.Utilities.ClassUtilities.ClassCreationResult;
 
@@ -17,13 +16,13 @@ namespace OutOfTimePrototype.Services
         {
             _outOfTimeDbContext = outOfTimeDbContext;
         }
-        public async Task<ClassCreationResult> TryCreateClass(ClassDTO classDTO)
+        public async Task<ClassCreationResult> TryCreateClass(ClassDto classDto)
         {
             var newClass = new Class
             {
-                Cluster = await _outOfTimeDbContext.Clusters.SingleOrDefaultAsync(x => x.Number == classDTO.ClusterNumber),
-                Date = classDTO.Date,
-                Educator = await _outOfTimeDbContext.Educators.SingleOrDefaultAsync(x => x.Id == classDTO.EducatorId),
+                Cluster = await _outOfTimeDbContext.Clusters.SingleOrDefaultAsync(x => x.Number == classDto.ClusterNumber),
+                Date = classDto.Date,
+                Educator = await _outOfTimeDbContext.Educators.SingleOrDefaultAsync(x => x.Id == classDto.EducatorId),
 
             };
 

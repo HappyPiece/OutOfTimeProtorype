@@ -19,7 +19,7 @@ namespace OutOfTimePrototype.Controllers
         }
 
         [HttpPost, Route("create")]
-        public async Task<IActionResult> CreateClass(ClassDTO classDTO)
+        public async Task<IActionResult> CreateClass(ClassDto classDto)
         {
             if (!ModelState.IsValid)
             {

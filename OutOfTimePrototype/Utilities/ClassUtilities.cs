@@ -11,6 +11,7 @@
                 Status = classCreationStatus;
                 ErrorMessage = errorMessage;
             }
+            
 
             public enum ClassCreationStatus
             {
