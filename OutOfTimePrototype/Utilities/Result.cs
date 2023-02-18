@@ -25,7 +25,7 @@ public class Result
         return new Result(e);
     }
 
-    public static Result Fail<T>(Exception e)
+    public static Result<T> Fail<T>(Exception e)
     {
         return new Result<T>(e);
     }
@@ -35,9 +35,20 @@ public class Result
         return new Result();
     }
 
-    public static Result Success<T>(T value)
+    public static Result<T> Success<T>(T value)
     {
         return new Result<T>(value);
+    }
+
+    public void Match(Action success, Action<Exception> fail)
+    {
+        if (IsSucceed) success();
+        else fail(Error);
+    }
+
+    public TResult Match<TResult>(Func<TResult> success, Func<Exception, TResult> fail)
+    {
+        return IsSucceed ? success() : fail(Error);
     }
 
     public override bool Equals(object? obj)
@@ -71,4 +82,15 @@ public class Result<T> : Result
     }
 
     public T? Value { get; }
+
+    public void Match(Action<T> succeed, Action<Exception> fail)
+    {
+        if (IsSucceed) succeed(Value);
+        else fail(Error);
+    }
+
+    public TResult Match<TResult>(Func<T, TResult> succeed, Func<Exception, TResult> fail)
+    {
+        return IsSucceed ? succeed(Value) : fail(Error);
+    }
 }

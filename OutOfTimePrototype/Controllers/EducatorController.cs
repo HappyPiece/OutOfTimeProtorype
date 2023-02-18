@@ -23,7 +23,6 @@ public class EducatorController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var result = new { educators = await _educatorService.GetAll() };
-
         return Ok(result);
     }
 
@@ -38,7 +37,6 @@ public class EducatorController : ControllerBase
     {
         var result = new
             { unoccupiedEducators = await _educatorService.GetAllUnoccupied(timeSlotNumber, date) };
-
         return Ok(result);
     }
 
@@ -53,8 +51,10 @@ public class EducatorController : ControllerBase
     public async Task<IActionResult> Edit(Guid id, [FromBody] EducatorDto educatorDto)
     {
         var result = await _educatorService.Edit(id, educatorDto);
-        if (result is { IsFailed: true, Error: RecordNotFoundException }) return BadRequest();
-        return NoContent();
+        return result.Match<IActionResult>(
+            NoContent,
+            e => e is RecordNotFoundException ? BadRequest(e.Message) : StatusCode(500)
+        );
     }
 
     [HttpDelete("delete/{id:guid}")]
