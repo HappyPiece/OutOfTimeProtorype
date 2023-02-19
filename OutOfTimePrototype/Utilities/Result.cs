@@ -1,5 +1,17 @@
 namespace OutOfTimePrototype.Utilities;
 
+/// <summary>
+///     Class for returning a result without throwing exception, when exception is expected and common,
+///     e.g. invalid data passed by the user
+/// </summary>
+/// <example>
+///     <code>
+/// public void Save(ClassDto classDto); // The method is Action and can't fail
+/// public List&#60;Class&#62; GetAll(); // The method is Function and can't fail
+/// public Result Create(Guid id); // The method is Action and can fail
+/// public Result&#60;Class&#62; GetBy(Guid id); // The method is Function and can fail
+/// </code>
+/// </example>
 public class Result
 {
     protected Result()
@@ -82,6 +94,11 @@ public class Result<T> : Result
     }
 
     public T? Value { get; }
+
+    public static implicit operator Result<T>(T value)
+    {
+        return new Result<T>(value);
+    }
 
     public void Match(Action<T> succeed, Action<Exception> fail)
     {

@@ -10,5 +10,5 @@ public interface IEducatorService
     Task<List<Educator>> GetAllUnoccupied(int timeSlotNumber, DateTime dateTime);
     Task Create(EducatorDto educatorDto);
     Task<Result> Edit(Guid id, EducatorDto educatorDto);
-    Task Delete(Guid id);
+    Task<Result> Delete(Guid id);
 }

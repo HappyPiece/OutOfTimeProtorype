@@ -60,7 +60,10 @@ public class EducatorController : ControllerBase
     [HttpDelete("delete/{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        await _educatorService.Delete(id);
-        return NoContent();
+        var result = await _educatorService.Delete(id);
+        return result.Match<IActionResult>(
+            NoContent,
+            e => e is RecordNotFoundException ? BadRequest(e.Message) : StatusCode(500)
+        );
     }
 }

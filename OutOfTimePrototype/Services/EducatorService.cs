@@ -10,8 +10,8 @@ namespace OutOfTimePrototype.Services;
 
 public class EducatorService : IEducatorService
 {
-    private readonly OutOfTimeDbContext _outOfTimeDbContext;
     private readonly IMapper _mapper;
+    private readonly OutOfTimeDbContext _outOfTimeDbContext;
 
     public EducatorService(OutOfTimeDbContext outOfTimeDbContext, IMapper mapper)
     {
@@ -19,11 +19,6 @@ public class EducatorService : IEducatorService
         _mapper = mapper;
     }
 
-    private async Task<bool> IsExistsById(Guid id)
-    {
-        return await _outOfTimeDbContext.Educators.AnyAsync(educator => educator.Id == id);
-    }
-    
     public async Task<List<Educator>> GetAll()
     {
         return await _outOfTimeDbContext.Educators.ToListAsync();
@@ -36,8 +31,9 @@ public class EducatorService : IEducatorService
                 DateOnly.FromDateTime(@class.Date) == DateOnly.FromDateTime(date))
             .Select(@class => @class.Educator)
             .ToListAsync();
-        
-        return await _outOfTimeDbContext.Educators.Where(educator => !occupiedEducators.Contains(educator)).ToListAsync();
+
+        return await _outOfTimeDbContext.Educators.Where(educator => !occupiedEducators.Contains(educator))
+            .ToListAsync();
     }
 
     public async Task Create(EducatorDto educatorDto)
@@ -64,10 +60,20 @@ public class EducatorService : IEducatorService
         return Result.Success();
     }
 
-    public async Task Delete(Guid id)
+    public async Task<Result> Delete(Guid id)
     {
-        var eToRemove = new Educator { Id = id };
-        _outOfTimeDbContext.Educators.Remove(eToRemove);
+        if (await _outOfTimeDbContext.Educators.AnyAsync(e => e.Id == id))
+            return Result.Fail(new RecordNotFoundException($"Educator with id '{id}' not found"));
+
+        var entityToRemove = new Educator { Id = id };
+        _outOfTimeDbContext.Educators.Remove(entityToRemove);
         await _outOfTimeDbContext.SaveChangesAsync();
+
+        return Result.Success();
+    }
+
+    private async Task<bool> IsExistsById(Guid id)
+    {
+        return await _outOfTimeDbContext.Educators.AnyAsync(educator => educator.Id == id);
     }
 }
