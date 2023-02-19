@@ -63,19 +63,19 @@ namespace OutOfTimePrototype.Utilities
                         }
                     case ClassOperationStatus.ClassCreated:
                         {
-                            message = "Class successfully created";
+                            message = $"Class was successfully created, Id {arg}";
                             httpStatusCode = HttpStatusCode.Created;
                             break;
                         }
                     case ClassOperationStatus.ClassEdited:
                         {
-                            message = "Class successfully edited";
+                            message = $"Class with id {arg} was successfully edited";
                             httpStatusCode = HttpStatusCode.OK;
                             break;
                         }
                     case ClassOperationStatus.ClassDeleted:
                         {
-                            message = "Class successfully deleted";
+                            message = $"Class with id {arg} was successfully deleted";
                             httpStatusCode = HttpStatusCode.OK;
                             break;
                         }

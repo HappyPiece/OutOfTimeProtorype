@@ -83,6 +83,21 @@ namespace OutOfTimePrototype.Services
             return GenerateDefaultClassOperationResult(ClassOperationStatus.Success, queryResult: result);
         }
 
+        public async Task<ClassOperationResult> TryDeleteClass(Guid id)
+        {
+            Class? @class = await _outOfTimeDbContext.Classes.SingleOrDefaultAsync(x => x.Id == id);
+
+            if (@class is null)
+            {
+                return GenerateDefaultClassOperationResult(ClassOperationStatus.ClassNotFound, id.ToString());
+            }
+
+            _outOfTimeDbContext.Classes.Remove(@class);
+            await _outOfTimeDbContext.SaveChangesAsync();
+
+            return GenerateDefaultClassOperationResult(ClassOperationStatus.ClassDeleted, id.ToString());
+        }
+
         public async Task<ClassOperationResult> TryCreateClass(ClassDto classDto)
         {
             TimeSlot? timeSlot = await GetTimeSlotIfExists(classDto.TimeSlotNumber);
@@ -136,7 +151,7 @@ namespace OutOfTimePrototype.Services
             await _outOfTimeDbContext.Classes.AddAsync(newClass);
             await _outOfTimeDbContext.SaveChangesAsync();
 
-            return GenerateDefaultClassOperationResult(status: ClassOperationStatus.ClassEdited);
+            return GenerateDefaultClassOperationResult(status: ClassOperationStatus.ClassCreated, arg: newClass.Id.ToString());
         }
 
 
@@ -236,7 +251,7 @@ namespace OutOfTimePrototype.Services
 
             await _outOfTimeDbContext.SaveChangesAsync();
 
-            return GenerateDefaultClassOperationResult(status: ClassOperationStatus.ClassEdited);
+            return GenerateDefaultClassOperationResult(status: ClassOperationStatus.ClassEdited, arg: @class.Id.ToString());
         }
 
         private async Task<ClassOperationResult> CheckConflictPresent(Class newClass, Guid? thisClassId = null)

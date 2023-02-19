@@ -54,17 +54,9 @@ namespace OutOfTimePrototype.Controllers
         [HttpDelete, Route("{id}/delete")]
         public async Task<IActionResult> DeleteClass([FromRoute] Guid id)
         {
-            Class? @class = await _outOfTimeDbContext.Classes.SingleOrDefaultAsync(x => x.Id == id);
+            var result = await _classService.TryDeleteClass(id);
 
-            if (@class is null)
-            {
-                return NotFound();
-            }
-
-            _outOfTimeDbContext.Classes.Remove(@class);
-            await _outOfTimeDbContext.SaveChangesAsync();
-
-            return StatusCode(200);
+            return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
         }
 
         [HttpGet, Route("get")]

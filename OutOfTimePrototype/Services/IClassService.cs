@@ -9,6 +9,7 @@ namespace OutOfTimePrototype.Services
     {
         Task<ClassOperationResult> TryCreateClass(ClassDto ClassDto);
         Task<ClassOperationResult> TryEditClass(Guid id, ClassEditDto classEditDto, bool nullMode);
+        Task<ClassOperationResult> TryDeleteClass(Guid id);
         Task<ClassOperationResult> QueryClasses(ClassQueryDto classQueryDto);
     }
 }
