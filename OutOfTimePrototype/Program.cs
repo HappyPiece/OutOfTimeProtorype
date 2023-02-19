@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
@@ -5,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using OutOfTimePrototype.Config;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.Services;
+using OutOfTimePrototype.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -18,9 +20,12 @@ services.AddControllers().AddJsonOptions(options =>
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
-services.AddScoped<IClassService, ClassService>();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 services.AddDbContext<OutOfTimeDbContext>(options =>
 {
@@ -36,6 +41,8 @@ services.AddSingleton(mapper);
 // services.AddScoped<IClassService, ClassService>();
 services.AddScoped<ILectureHallService, LectureHallService>();
 services.AddScoped<IEducatorService, EducatorService>();
+services.AddScoped<IClassService, ClassService>();
+services.AddScoped<IClusterService, ClusterService>();
 
 var app = builder.Build();
 

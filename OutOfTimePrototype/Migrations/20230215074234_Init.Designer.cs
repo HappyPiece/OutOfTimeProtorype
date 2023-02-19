@@ -12,7 +12,7 @@ using OutOfTimePrototype.DAL;
 namespace OutOfTimePrototype.Migrations
 {
     [DbContext(typeof(OutOfTimeDbContext))]
-    [Migration("20230214132318_Init")]
+    [Migration("20230215074234_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -129,6 +129,12 @@ namespace OutOfTimePrototype.Migrations
                     b.HasIndex("SuperClusterNumber");
 
                     b.ToTable("Clusters");
+
+                    b.HasData(
+                        new
+                        {
+                            Number = "9721"
+                        });
                 });
 
             modelBuilder.Entity("OutOfTimePrototype.DAL.Models.Educator", b =>
@@ -151,6 +157,22 @@ namespace OutOfTimePrototype.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Educators");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("209f16f1-3030-47bf-b4e4-1b88cd9a0733"),
+                            FirstName = "Educator",
+                            LastName = "Educatorov",
+                            MiddleName = "Educatorovich"
+                        },
+                        new
+                        {
+                            Id = new Guid("03ac257d-0977-44b0-a49c-9d03f976db79"),
+                            FirstName = "Prepod",
+                            LastName = "Prepodov",
+                            MiddleName = "Prepodovich"
+                        });
                 });
 
             modelBuilder.Entity("OutOfTimePrototype.DAL.Models.LectureHall", b =>
@@ -198,44 +220,44 @@ namespace OutOfTimePrototype.Migrations
                         new
                         {
                             Number = 1,
-                            EndTime = new DateTime(2023, 2, 14, 3, 20, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 1, 45, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 15, 3, 20, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 15, 1, 45, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 2,
-                            EndTime = new DateTime(2023, 2, 14, 5, 10, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 3, 35, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 15, 5, 10, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 15, 3, 35, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 3,
-                            EndTime = new DateTime(2023, 2, 14, 7, 0, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 5, 25, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 15, 7, 0, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 15, 5, 25, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 4,
-                            EndTime = new DateTime(2023, 2, 14, 9, 20, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 7, 45, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 15, 9, 20, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 15, 7, 45, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 5,
-                            EndTime = new DateTime(2023, 2, 14, 11, 10, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 9, 35, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 15, 11, 10, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 15, 9, 35, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 6,
-                            EndTime = new DateTime(2023, 2, 14, 13, 0, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 11, 25, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 15, 13, 0, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 15, 11, 25, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 7,
-                            EndTime = new DateTime(2023, 2, 14, 14, 50, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 13, 15, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 15, 14, 50, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 15, 13, 15, 0, 0, DateTimeKind.Utc)
                         });
                 });
 
