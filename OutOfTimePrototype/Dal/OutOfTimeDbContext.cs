@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using LanguageExt;
+using Microsoft.EntityFrameworkCore;
+using OutOfTimePrototype.Dal.Models;
 using OutOfTimePrototype.DAL.Models;
 
 namespace OutOfTimePrototype.DAL
@@ -11,6 +13,8 @@ namespace OutOfTimePrototype.DAL
 
         public DbSet<Class> Classes { get; set; } = default!;
 
+        public DbSet<Subject> Subjects { get; set; } = default!;
+
         public DbSet<Educator> Educators { get; set; } = default!;
 
         public DbSet<LectureHall> LectureHalls { get; set; } = default!;
@@ -19,10 +23,17 @@ namespace OutOfTimePrototype.DAL
 
         public DbSet<Cluster> Clusters { get; set; } = default!;
 
+        public DbSet<User> Users { get; set; } = default!;
+
         public OutOfTimeDbContext(DbContextOptions options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<StudentUser>();
+            modelBuilder.Entity<EducatorUser>();
+            modelBuilder.Entity<ScheduleBureauUser>();
+            modelBuilder.Entity<AdminUser>();
+
             modelBuilder.Entity<ClassType>().HasKey(x => x.Name);
             modelBuilder.Entity<TimeSlot>().HasKey(x => x.Number);
             modelBuilder.Entity<Cluster>().HasKey(x => x.Number);

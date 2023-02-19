@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
-using OutOfTimePrototype.Services;
+using OutOfTimePrototype.Services.Interfaces;
 using System.Net;
 
-namespace OutOfTimePrototype.Utilities
+namespace OutOfTimePrototype.Services.Implementations
 {
     public class ClusterService : IClusterService
     {
@@ -27,7 +27,7 @@ namespace OutOfTimePrototype.Utilities
                 nextClusters = new List<Cluster>();
                 foreach (var clust in currentClusters)
                 {
-                    if (clust.SuperCluster is not null) 
+                    if (clust.SuperCluster is not null)
                         nextClusters.AddRange(await _outOfTimeDbContext.Clusters.Include(x => x.SuperCluster).
                         Where(x => x == clust.SuperCluster)
                         .ToListAsync());

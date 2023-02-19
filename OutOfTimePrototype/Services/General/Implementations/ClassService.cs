@@ -3,18 +3,19 @@ using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.Dto;
 using OutOfTimePrototype.DTO;
+using OutOfTimePrototype.Services.Interfaces;
 using System.Diagnostics.Metrics;
 using static OutOfTimePrototype.Utilities.ClassUtilities;
 using static OutOfTimePrototype.Utilities.ClassUtilities.ClassOperationResult;
 
 
-namespace OutOfTimePrototype.Services
+namespace OutOfTimePrototype.Services.Implementations
 {
     public class ClassService : IClassService
     {
         private readonly OutOfTimeDbContext _outOfTimeDbContext;
         private readonly IClusterService _clusterService;
-        
+
         public ClassService(OutOfTimeDbContext outOfTimeDbContext, IClusterService clusterService)
         {
             _outOfTimeDbContext = outOfTimeDbContext;
@@ -163,7 +164,7 @@ namespace OutOfTimePrototype.Services
                 .Include(x => x.Educator)
                 .Include(x => x.LectureHall)
                 .Include(x => x.Type)
-                .SingleOrDefaultAsync(x=> x.Id == id);
+                .SingleOrDefaultAsync(x => x.Id == id);
 
             if (@class is null)
             {
@@ -223,7 +224,7 @@ namespace OutOfTimePrototype.Services
                     return GenerateDefaultClassOperationResult(ClassOperationStatus.LectureHallNotFound, classEditDto.LectureHallId.ToString());
             }
 
-            
+
             if (nullMode)
             {
                 @class.Date = classEditDto.Date ?? throw new ArgumentNullException();
@@ -278,13 +279,13 @@ namespace OutOfTimePrototype.Services
             }
 
             // checks whether the educator is busy at the specified time
-            if ((newClass.Educator is not null) ? await concurrentClasses.Where(x => x.Educator != null).AnyAsync(x => x.Educator!.Id == newClass.Educator.Id) : false)
+            if (newClass.Educator is not null ? await concurrentClasses.Where(x => x.Educator != null).AnyAsync(x => x.Educator!.Id == newClass.Educator.Id) : false)
             {
                 return GenerateDefaultClassOperationResult(ClassOperationStatus.EducatorOccupied, newClass.Educator.Id.ToString());
             }
 
             // checks whether the lecture hall is occupied at the specified time
-            if ((newClass.LectureHall is not null) ? await concurrentClasses.Where(x => x.LectureHall != null).AnyAsync(x => x.LectureHall!.Id == newClass.LectureHall.Id) : false)
+            if (newClass.LectureHall is not null ? await concurrentClasses.Where(x => x.LectureHall != null).AnyAsync(x => x.LectureHall!.Id == newClass.LectureHall.Id) : false)
             {
                 return GenerateDefaultClassOperationResult(ClassOperationStatus.LectureHallOccupied, newClass.LectureHall.Id.ToString());
             }

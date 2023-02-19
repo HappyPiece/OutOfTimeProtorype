@@ -1,6 +1,6 @@
 ﻿using OutOfTimePrototype.DAL.Models;
 
-namespace OutOfTimePrototype.Services
+namespace OutOfTimePrototype.Services.Interfaces
 {
     public interface IClusterService
     {

@@ -3,7 +3,7 @@ using OutOfTimePrototype.Dto;
 using OutOfTimePrototype.DTO;
 using static OutOfTimePrototype.Utilities.ClassUtilities;
 
-namespace OutOfTimePrototype.Services
+namespace OutOfTimePrototype.Services.Interfaces
 {
     public interface IClassService
     {

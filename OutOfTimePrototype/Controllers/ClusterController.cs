@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.DTO;
-using OutOfTimePrototype.Services;
+using OutOfTimePrototype.Services.Interfaces;
 
 namespace OutOfTimePrototype.Controllers
 {
