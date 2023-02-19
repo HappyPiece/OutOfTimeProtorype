@@ -39,6 +39,17 @@ namespace OutOfTimePrototype.Controllers
             return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
         }
 
+        /// <summary>
+        /// Sets the properties of a class with an Id passed in the route to match the ones specified in DTO.
+        /// The Id itself cannot be edited and the corresponding DTO property is ignored.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="classEditDto"></param>
+        /// <param name="nullMode">
+        /// When true, all the unspecified (null) parameters passed in DTO are to be set null to the actual class (thus such requests with unspecified Date, TimeSlot or Cluster properties will fail).
+        /// When false, null parameters are ignored.
+        /// </param>
+        /// <returns></returns>
         [HttpPost, Route("{id}/edit")]
         public async Task<IActionResult> EditClass(Guid id, ClassEditDto classEditDto, [FromQuery] bool nullMode = false)
         {
@@ -59,8 +70,25 @@ namespace OutOfTimePrototype.Controllers
             return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
         }
 
-        [HttpGet, Route("get")]
-        public async Task<IActionResult> GetClasses(
+        /// <summary>
+        /// Used to retrieve classes that meet the specified requirements.
+        /// Returns a collection of classes that match ALL the individual properties that have been supplied.
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="clusterNumber"></param>
+        /// <param name="educatorId"></param>
+        /// <param name="lectureHallId"></param>
+        /// <remarks>
+        /// Sample request which will try to retrieve classes set from 20.02.2023 through to 26.02.2023 for cluster "1337":
+        /// 
+        ///     /api/class/query?startDate=2023-02-20&amp;endDate=2023-02-26&amp;clusterNumber=1337
+        /// 
+        /// </remarks>
+        /// <returns>A collection of classes that match ALL the individual properties that have been supplied.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        [HttpGet, Route("query")]
+        public async Task<IActionResult> QueryClasses(
             [FromQuery] DateTime? startDate,
             [FromQuery] DateTime? endDate,
             [FromQuery] string? clusterNumber,
