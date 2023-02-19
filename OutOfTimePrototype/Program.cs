@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using OutOfTimePrototype.Config;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.Services;
+using OutOfTimePrototype.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -18,9 +19,8 @@ services.AddControllers().AddJsonOptions(options =>
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
-services.AddScoped<IClassService, ClassService>();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 services.AddDbContext<OutOfTimeDbContext>(options =>
 {
@@ -36,6 +36,8 @@ services.AddSingleton(mapper);
 // services.AddScoped<IClassService, ClassService>();
 services.AddScoped<ILectureHallService, LectureHallService>();
 services.AddScoped<IEducatorService, EducatorService>();
+services.AddScoped<IClassService, ClassService>();
+services.AddScoped<IClusterService, ClusterService>();
 
 var app = builder.Build();
 

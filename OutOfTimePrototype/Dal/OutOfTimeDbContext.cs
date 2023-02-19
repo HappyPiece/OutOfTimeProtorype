@@ -35,6 +35,13 @@ namespace OutOfTimePrototype.DAL
 
             // Data seeding
 
+            modelBuilder.Entity<Cluster>().HasData( new Cluster { Number = "9721"} );
+
+            modelBuilder.Entity<Educator>().HasData(
+                new Educator { FirstName = "Educator", MiddleName = "Educatorovich", LastName = "Educatorov"},
+                new Educator { FirstName = "Prepod", MiddleName = "Prepodovich", LastName = "Prepodov"}
+            ); 
+
             modelBuilder.Entity<TimeSlot>().HasData(
                 new TimeSlot { Number = 1, StartTime = DateTime.ParseExact("08:45", "HH:mm", null).ToUniversalTime(), EndTime = DateTime.ParseExact("10:20", "HH:mm", null).ToUniversalTime() },
                 new TimeSlot { Number = 2, StartTime = DateTime.ParseExact("10:35", "HH:mm", null).ToUniversalTime(), EndTime = DateTime.ParseExact("12:10", "HH:mm", null).ToUniversalTime() },

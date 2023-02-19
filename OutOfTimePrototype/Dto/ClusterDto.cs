@@ -11,10 +11,11 @@ namespace OutOfTimePrototype.DTO
         public string? SuperClusterNumber { get; set; } = null;
     }
 
-    public class ClusterEditDTO
+    public class ClusterEditDto
     {
         public string? Number { get; set; }
 
         public string? SuperClusterNumber { get; set; } = null;
     }
 }
+

@@ -160,17 +160,31 @@ namespace OutOfTimePrototype.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Clusters",
+                columns: new[] { "Number", "SuperClusterNumber" },
+                values: new object[] { "9721", null });
+
+            migrationBuilder.InsertData(
+                table: "Educators",
+                columns: new[] { "Id", "FirstName", "LastName", "MiddleName" },
+                values: new object[,]
+                {
+                    { new Guid("03ac257d-0977-44b0-a49c-9d03f976db79"), "Prepod", "Prepodov", "Prepodovich" },
+                    { new Guid("209f16f1-3030-47bf-b4e4-1b88cd9a0733"), "Educator", "Educatorov", "Educatorovich" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "TimeSlots",
                 columns: new[] { "Number", "EndTime", "StartTime" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2023, 2, 14, 3, 20, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 14, 1, 45, 0, 0, DateTimeKind.Utc) },
-                    { 2, new DateTime(2023, 2, 14, 5, 10, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 14, 3, 35, 0, 0, DateTimeKind.Utc) },
-                    { 3, new DateTime(2023, 2, 14, 7, 0, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 14, 5, 25, 0, 0, DateTimeKind.Utc) },
-                    { 4, new DateTime(2023, 2, 14, 9, 20, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 14, 7, 45, 0, 0, DateTimeKind.Utc) },
-                    { 5, new DateTime(2023, 2, 14, 11, 10, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 14, 9, 35, 0, 0, DateTimeKind.Utc) },
-                    { 6, new DateTime(2023, 2, 14, 13, 0, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 14, 11, 25, 0, 0, DateTimeKind.Utc) },
-                    { 7, new DateTime(2023, 2, 14, 14, 50, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 14, 13, 15, 0, 0, DateTimeKind.Utc) }
+                    { 1, new DateTime(2023, 2, 15, 3, 20, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 15, 1, 45, 0, 0, DateTimeKind.Utc) },
+                    { 2, new DateTime(2023, 2, 15, 5, 10, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 15, 3, 35, 0, 0, DateTimeKind.Utc) },
+                    { 3, new DateTime(2023, 2, 15, 7, 0, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 15, 5, 25, 0, 0, DateTimeKind.Utc) },
+                    { 4, new DateTime(2023, 2, 15, 9, 20, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 15, 7, 45, 0, 0, DateTimeKind.Utc) },
+                    { 5, new DateTime(2023, 2, 15, 11, 10, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 15, 9, 35, 0, 0, DateTimeKind.Utc) },
+                    { 6, new DateTime(2023, 2, 15, 13, 0, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 15, 11, 25, 0, 0, DateTimeKind.Utc) },
+                    { 7, new DateTime(2023, 2, 15, 14, 50, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 15, 13, 15, 0, 0, DateTimeKind.Utc) }
                 });
 
             migrationBuilder.CreateIndex(

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.DTO;
+using OutOfTimePrototype.Services;
 
 namespace OutOfTimePrototype.Controllers
 {
@@ -11,10 +12,12 @@ namespace OutOfTimePrototype.Controllers
     public class ClusterController : ControllerBase
     {
         private readonly OutOfTimeDbContext _outOfTimeDbContext;
+        private readonly IClusterService _clusterService;
 
-        public ClusterController(OutOfTimeDbContext outOfTimeDbContext)
+        public ClusterController(OutOfTimeDbContext outOfTimeDbContext, IClusterService clusterService)
         {
             _outOfTimeDbContext = outOfTimeDbContext;
+            _clusterService = clusterService;
         }
 
         [HttpPost, Route("create")]
@@ -48,7 +51,7 @@ namespace OutOfTimePrototype.Controllers
         }
 
         [HttpPost, Route("{number}/edit")]
-        public async Task<IActionResult> EditCluster(string number, ClusterEditDTO clusterEditDto)
+        public async Task<IActionResult> EditCluster(string number, ClusterEditDto clusterEditDto)
         {
             if (!ModelState.IsValid)
             {
@@ -126,6 +129,20 @@ namespace OutOfTimePrototype.Controllers
             }
 
             return Ok(new ClusterDto { Number = cluster.Number, SuperClusterNumber = cluster.SuperCluster?.Number });
+        }
+
+        [HttpGet, Route("{number}/super")]
+        public async Task<IActionResult> GetSuper(string number)
+        {
+            var cluster = await _outOfTimeDbContext.Clusters.Include(x => x.SuperCluster).SingleOrDefaultAsync(x => x.Number == number);
+            if (cluster == null)
+            {
+                return NotFound("Cluster doesn't exist");
+            }
+
+            var super = await _clusterService.GetSuperClusters(cluster);
+
+            return Ok(super.Select(x => new ClusterDto { Number = x.Number, SuperClusterNumber = x.SuperCluster?.Number }));
         }
     }
 }
