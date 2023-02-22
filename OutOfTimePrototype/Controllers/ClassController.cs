@@ -112,7 +112,7 @@ namespace OutOfTimePrototype.Controllers
 
             var result = await _classService.QueryClasses(classQueryDto);
 
-            if (result.Status is not ClassOperationStatus.Success)
+            if (result.Status is not OperationStatus.Success)
             {
                 return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
             }

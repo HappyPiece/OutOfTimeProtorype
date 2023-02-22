@@ -82,5 +82,11 @@ namespace OutOfTimePrototype.Services.Implementations
             }
             return result;
         }
+
+        public async Task<Cluster?> TryGetCluster(string number)
+        {
+            var cluster = await _outOfTimeDbContext.Clusters.Include(x => x.SuperCluster).SingleOrDefaultAsync(x => x.Number == number);
+            return cluster;
+        }
     }
 }

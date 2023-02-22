@@ -8,8 +8,11 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OutOfTimePrototype.Config;
 using OutOfTimePrototype.Configurations;
+using OutOfTimePrototype.Dal.Models;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.Services.Authentication;
+using OutOfTimePrototype.Services.General.Implementations;
+using OutOfTimePrototype.Services.General.Interfaces;
 using OutOfTimePrototype.Services.Implementations;
 using OutOfTimePrototype.Services.Interfaces;
 
@@ -76,6 +79,13 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddAuthorization(
+    options =>
+    {
+        options.AddPolicy("RequireRoot", policy => policy.RequireRole(new List<string>() { Role.Root.ToString() }));
+    }
+);
+
 // AutoMapper configuration
 var config = new MapperConfiguration(cfg => { cfg.AddProfile<MappingProfile>(); });
 var mapper = config.CreateMapper();
@@ -87,6 +97,7 @@ services.AddScoped<ILectureHallService, LectureHallService>();
 services.AddScoped<IEducatorService, EducatorService>();
 services.AddScoped<IClassService, ClassService>();
 services.AddScoped<IClusterService, ClusterService>();
+services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
@@ -99,6 +110,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

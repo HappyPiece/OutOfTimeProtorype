@@ -28,12 +28,7 @@ namespace OutOfTimePrototype.DAL
         public OutOfTimeDbContext(DbContextOptions options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<StudentUser>();
-            modelBuilder.Entity<EducatorUser>();
-            modelBuilder.Entity<ScheduleBureauUser>();
-            modelBuilder.Entity<AdminUser>();
-
+        { 
             modelBuilder.Entity<ClassType>().HasKey(x => x.Name);
             modelBuilder.Entity<TimeSlot>().HasKey(x => x.Number);
             modelBuilder.Entity<Cluster>().HasKey(x => x.Number);
@@ -44,8 +39,7 @@ namespace OutOfTimePrototype.DAL
 
             //modelBuilder.Entity<Class>().HasOne(x => new { x.TimeSlot, x.Cluster });
 
-            // Data seeding
-
+            //Data seeding
             modelBuilder.Entity<Cluster>().HasData( new Cluster { Number = "9721"} );
 
             modelBuilder.Entity<Educator>().HasData(

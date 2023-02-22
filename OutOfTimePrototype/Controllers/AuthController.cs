@@ -7,8 +7,10 @@ using OutOfTimePrototype.Dal.Models;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.Dto;
 using OutOfTimePrototype.Services.Authentication;
-using OutOfTimePrototype.Services.Interfaces;
+using OutOfTimePrototype.Services.General.Interfaces;
 using System.Security.Claims;
+using System.Text.Json;
+using static OutOfTimePrototype.Utilities.UserUtilities.UserOperationResult;
 
 namespace OutOfTimePrototype.Controllers
 {
@@ -18,88 +20,38 @@ namespace OutOfTimePrototype.Controllers
     {
         private readonly OutOfTimeDbContext _outOfTimeDbContext;
         private readonly ITokenService _tokenService;
+        private readonly IUserService _userService;
 
-        public AuthController(OutOfTimeDbContext outOfTimeDbContext, ITokenService tokenService)
+        public AuthController(OutOfTimeDbContext outOfTimeDbContext, ITokenService tokenService, IUserService userService)
         {
             _tokenService = tokenService;
             _outOfTimeDbContext = outOfTimeDbContext;
+            _userService = userService;
         }
 
-        [HttpPost, Route("students/register")]
-        public async Task<IActionResult> Register(StudentUserDto studentUserDto)
+        [HttpPost, Route("register")]
+        public async Task<IActionResult> Register(UserDto userDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
-            if (await _outOfTimeDbContext.Users.AnyAsync(x => (x.Email == studentUserDto.Email)))
+           
+            if (!userDto.Validate().IsValid)
             {
-                return BadRequest("User with such Email already exists");
+                return BadRequest(new ValidationProblemDetails(userDto.Validate()));
             }
 
-            var user = new StudentUser
+            var result = await _userService.TryRegisterUser(userDto);
+            if (result.Status != OperationStatus.UserRegistered)
             {
-                Id = Guid.NewGuid(),
-                Email = studentUserDto.Email,
-                FirstName = studentUserDto.FirstName,
-                LastName = studentUserDto.LastName,
-                MiddleName = studentUserDto.MiddleName,
-                Password = studentUserDto.Password,
-                GradeBookNumber = studentUserDto.GradeBookNumber
-            };
-
-            user.ClaimedRoles.Add(Roles.Student);
-
-            await _outOfTimeDbContext.Users.AddAsync(user);
-
-            if (studentUserDto.Cluster is not null)
-            {
-                // TODO: assign cluster
+                return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
             }
-
-            await _outOfTimeDbContext.SaveChangesAsync();
 
             return await Login(new LoginDto
             {
-                Password = studentUserDto.Password,
-                Email = studentUserDto.Email
-            });
-        }
-
-        [HttpPost, Route("educators/register")]
-        public async Task<IActionResult> Register(EducatorUserDto educatorUserDto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (await _outOfTimeDbContext.Users.AnyAsync(x => (x.Email == educatorUserDto.Email)))
-            {
-                return BadRequest("User with such Email already exists");
-            }
-
-            var user = new EducatorUser
-            {
-                Id = Guid.NewGuid(),
-                Email = educatorUserDto.Email,
-                FirstName = educatorUserDto.FirstName,
-                LastName = educatorUserDto.LastName,
-                MiddleName = educatorUserDto?.MiddleName,
-                Password = educatorUserDto.Password
-            };
-
-            user.ClaimedRoles.Add(Roles.Educator);
-
-            await _outOfTimeDbContext.Users.AddAsync(user);
-
-            await _outOfTimeDbContext.SaveChangesAsync();
-
-            return await Login(new LoginDto
-            {
-                Password = educatorUserDto.Password,
-                Email = educatorUserDto.Email
+                Password = userDto.Password,
+                Email = userDto.Email
             });
         }
 
@@ -146,6 +98,7 @@ namespace OutOfTimePrototype.Controllers
         [HttpPost, Route("refresh")]
         public async Task<IActionResult> Refresh(RefreshDTO refreshDTO)
         {
+            var modelState = ModelState;
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);

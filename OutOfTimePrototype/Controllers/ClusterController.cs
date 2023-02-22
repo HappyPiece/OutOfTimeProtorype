@@ -114,7 +114,7 @@ namespace OutOfTimePrototype.Controllers
         {
             var clusters = await _outOfTimeDbContext.Clusters.ToListAsync();
 
-            var response = clusters.Select(x => new ClusterDto { Number = x.Number, SuperClusterNumber = x.SuperCluster?.Number });
+            var response = clusters.Select(x => new ClusterDto(x));
 
             return Ok(response);
         }
@@ -128,7 +128,7 @@ namespace OutOfTimePrototype.Controllers
                 return NotFound("Cluster doesn't exist");
             }
 
-            return Ok(new ClusterDto { Number = cluster.Number, SuperClusterNumber = cluster.SuperCluster?.Number });
+            return Ok(new ClusterDto(cluster));
         }
 
         [HttpGet, Route("{number}/super")]
@@ -142,7 +142,7 @@ namespace OutOfTimePrototype.Controllers
 
             var super = await _clusterService.GetSuperClusters(cluster);
 
-            return Ok(super.Select(x => new ClusterDto { Number = x.Number, SuperClusterNumber = x.SuperCluster?.Number }));
+            return Ok(super.Select(x => new ClusterDto(x)));
         }
     }
 }
