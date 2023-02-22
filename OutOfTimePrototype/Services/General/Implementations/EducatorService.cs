@@ -4,9 +4,10 @@ using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.DTO;
 using OutOfTimePrototype.Exceptions;
+using OutOfTimePrototype.Services.Interfaces;
 using OutOfTimePrototype.Utilities;
 
-namespace OutOfTimePrototype.Services;
+namespace OutOfTimePrototype.Services.Implementations;
 
 public class EducatorService : IEducatorService
 {
@@ -23,7 +24,7 @@ public class EducatorService : IEducatorService
     {
         return await _outOfTimeDbContext.Educators.AnyAsync(educator => educator.Id == id);
     }
-    
+
     public async Task<List<Educator>> GetAll()
     {
         return await _outOfTimeDbContext.Educators.ToListAsync();
@@ -36,7 +37,7 @@ public class EducatorService : IEducatorService
                 DateOnly.FromDateTime(@class.Date) == DateOnly.FromDateTime(date))
             .Select(@class => @class.Educator)
             .ToListAsync();
-        
+
         return await _outOfTimeDbContext.Educators.Where(educator => !occupiedEducators.Contains(educator)).ToListAsync();
     }
 
