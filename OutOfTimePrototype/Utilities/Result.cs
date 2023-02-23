@@ -52,7 +52,7 @@ public class Result
         return new Result<T>(value);
     }
 
-    public void Match(Action success, Action<Exception> fail)
+    public void Match(System.Action success, Action<Exception> fail)
     {
         if (IsSucceed) success();
         else fail(Error);

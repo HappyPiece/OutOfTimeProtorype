@@ -54,13 +54,13 @@ namespace OutOfTimePrototype.Dto
             LastName = user.LastName;
             GradeBookNumber = user.GradeBookNumber;
             ClusterNumber = user.Cluster?.Number;
-            ScheduleSelf = (user.ScheduleSelf != null) ? new EducatorDto(user.ScheduleSelf) : null;
+            ScheduleSelf = user.ScheduleSelf != null ? new EducatorDto(user.ScheduleSelf) : null;
         }
 
         public ModelStateDictionary Validate()
         {
             var result = new ModelStateDictionary();
-            if (!(new EmailAddressAttribute()).IsValid(Email))
+            if (!new EmailAddressAttribute().IsValid(Email))
             {
                 result.AddModelError("email", $"'{Email}' is not a valid Email adress");
             }     

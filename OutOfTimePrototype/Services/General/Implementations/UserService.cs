@@ -10,8 +10,11 @@ using OutOfTimePrototype.Services.Interfaces;
 using OutOfTimePrototype.Utilities;
 using System.ComponentModel;
 using System.Diagnostics.Metrics;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.OpenApi.Extensions;
 using static OutOfTimePrototype.Utilities.UserUtilities;
 using static OutOfTimePrototype.Utilities.UserUtilities.UserOperationResult;
+using Role = OutOfTimePrototype.Dal.Models.Role;
 
 namespace OutOfTimePrototype.Services.General.Implementations
 {
@@ -25,18 +28,17 @@ namespace OutOfTimePrototype.Services.General.Implementations
             _outOfTimeDbContext = outOfTimeDbContext;
             _clusterService = clusterService;
         }
+
         public async Task<UserOperationResult> TryGetUser(Guid id)
         {
             var user = await _outOfTimeDbContext.Users.SingleOrDefaultAsync(x => x.Id == id);
-            if (user == null)
-            {
-                return GenerateDefaultOperationResult(OperationStatus.NotFound, id.ToString());
-            }
-            return GenerateDefaultOperationResult(OperationStatus.Success, user: user);
-            
+            return user == null
+                ? GenerateDefaultOperationResult(OperationStatus.NotFound, id.ToString())
+                : GenerateDefaultOperationResult(OperationStatus.Success, user: user);
+
             throw new InvalidEnumArgumentException(user.AccountType.ToString());
         }
-
+        
         public async Task<UserOperationResult> TryRegisterUser(UserDto userDto)
         {
             if (await _outOfTimeDbContext.Users.AnyAsync(x => (x.Email == userDto.Email)))
@@ -46,27 +48,33 @@ namespace OutOfTimePrototype.Services.General.Implementations
 
             User user;
 
-            if (userDto.AccountType == AccountType.Student)
+            switch (userDto.AccountType)
             {
-                Cluster? cluster = null;
-                if (userDto.ClusterNumber is not null)
+                case AccountType.Student:
                 {
-                    cluster = await _clusterService.TryGetCluster(userDto.ClusterNumber);
-                    if (cluster is null)
+                    Cluster? cluster = null;
+                    if (userDto.ClusterNumber is not null)
                     {
-                        return GenerateDefaultOperationResult(OperationStatus.ClusterNotFound, arg: userDto.ClusterNumber);
+                        cluster = await _clusterService.TryGetCluster(userDto.ClusterNumber);
+                        if (cluster is null)
+                        {
+                            return GenerateDefaultOperationResult(OperationStatus.ClusterNotFound,
+                                arg: userDto.ClusterNumber);
+                        }
                     }
-                }
-                user = User.Initialize.Student(userDto, cluster);
-            }
-            else if (userDto.AccountType == AccountType.Educator)
-            {
-                user = User.Initialize.Educator(userDto);
 
-            }
-            else
-            {
-                user = User.Initialize.Default(userDto);
+                    user = User.Initialize.Student(userDto, cluster);
+                    break;
+                }
+                case AccountType.Educator:
+                    user = User.Initialize.Educator(userDto);
+                    break;
+                case AccountType.Default:
+                case AccountType.Admin:
+                case AccountType.ScheduleBureau:
+                default:
+                    user = User.Initialize.Default(userDto);
+                    break;
             }
 
             await _outOfTimeDbContext.Users.AddAsync(user);

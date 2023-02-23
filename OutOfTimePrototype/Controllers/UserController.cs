@@ -1,13 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using OutOfTimePrototype.Dal.Models;
+using OutOfTimePrototype.Authorization;
 using OutOfTimePrototype.DAL;
+using OutOfTimePrototype.Dal.Models;
 using OutOfTimePrototype.Services.General.Interfaces;
-using OutOfTimePrototype.Services.Interfaces;
 using OutOfTimePrototype.Utilities;
-using System.Security.Claims;
 using static OutOfTimePrototype.Utilities.UserUtilities;
 
 namespace OutOfTimePrototype.Controllers
@@ -28,29 +26,30 @@ namespace OutOfTimePrototype.Controllers
         [HttpGet, Authorize, Route("self")]
         public async Task<IActionResult> GetSelf()
         {
-            if (User.Identity is null) throw new ArgumentNullException("Expected not null User.Identity");
-            if (!Guid.TryParse(User.Identity.Name, out Guid id)) throw new ArgumentException("Expected User.Identity.Name to be valid string representation of Guid");
+            if (User.Identity is null)
+                throw new ArgumentNullException("User.Identity", "Expected not null User.Identity");
+            if (!Guid.TryParse(User.Identity.Name, out var id))
+                throw new ArgumentException("Expected User.Identity.Name to be valid string representation of Guid");
             return await GetUser(id);
         }
 
-        [HttpGet, Authorize(Roles = $"Root,Admin"), Route("{id}")]
+        [HttpGet, MinRoleAuthorize(Role.Admin), Route("{id:guid}")]
         public async Task<IActionResult> GetUser([FromRoute] Guid id)
         {
             var result = await _userService.TryGetUser(id);
-            if (result.Status != UserOperationResult.OperationStatus.Success)
-            {
-                return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
-            }
-            return Ok(result.User);
+            return result.Status != UserOperationResult.OperationStatus.Success
+                ? StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message)
+                : Ok(result.User);
         }
 
-        [HttpGet, Authorize(Roles = $"Root,Admin"), Route("unverified")]
+        [HttpGet, MinRoleAuthorize(Role.Admin), Route("unverified")]
         public async Task<IActionResult> GetUnverified()
         {
             throw new NotImplementedException();
         }
 
-        [HttpPut, Route("{id}/verify")]
+        [HttpPut, Route("{id:guid}/verify")]
+        [MinRoleAuthorize(Role.Admin)]
         public async Task<IActionResult> VerifyRole([FromRoute] Guid id, [FromQuery] Role role)
         {
             var operationResult = await _userService.TryGetUser(id);
@@ -62,16 +61,13 @@ namespace OutOfTimePrototype.Controllers
             var roles = User.Claims.Where(x => x.Type == ClaimTypes.Role).ToList();
             if (roles.Any(x => Enum.TryParse(x.Value, out Role userRole) && userRole.CanAssign(role)))
             {
-                operationResult.User.VerifiedRoles.Add(role);
-                operationResult.User.ClaimedRoles.Remove(role);
-                _outOfTimeDbContext.SaveChanges();
+                operationResult.User?.VerifiedRoles.Add(role);
+                operationResult.User?.ClaimedRoles.Remove(role);
+                await _outOfTimeDbContext.SaveChangesAsync();
                 return Ok();
             }
-            else
-            {
-                return StatusCode(403);
-            }
-           
+
+            return StatusCode(403);
         }
     }
 }

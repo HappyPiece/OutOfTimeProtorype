@@ -46,7 +46,8 @@ namespace OutOfTimePrototype.Dal.Models
         {
             Id = userDto.Id;
             Email = userDto.Email;
-            Password = userDto.Password ?? throw new ArgumentNullException("Attempted to initialize User without a password");
+            Password = userDto.Password ??
+                       throw new ArgumentNullException("userDto", "Attempted to initialize User without a password");
             ClaimedRoles = userDto.ClaimedRoles;
             VerifiedRoles = userDto.VerifiedRoles;
             AccountType = userDto.AccountType;
@@ -62,9 +63,11 @@ namespace OutOfTimePrototype.Dal.Models
         {
             public static User Default(UserDto userDto)
             {
-                var newUser = new User();
-                newUser.Email = userDto.Email;
-                newUser.Password = userDto.Password;
+                var newUser = new User
+                {
+                    Email = userDto.Email,
+                    Password = userDto.Password
+                };
 
                 return newUser;
             }
@@ -96,7 +99,7 @@ namespace OutOfTimePrototype.Dal.Models
             public static User Educator(UserDto userDto, Cluster? cluster = null)
             {
                 var newUser = Person(userDto);
-             
+
                 newUser.ClaimedRoles = new List<Role>() { Role.Educator };
                 newUser.AccountType = AccountType.Educator;
 
