@@ -13,6 +13,7 @@ public class MappingProfile : Profile
         CreateMap<LectureHallDto, LectureHall>().IgnoreNullProperties().IgnoreProperty(dto => dto.Id);
         CreateMap<LectureHallUpdateDto, LectureHall>().IgnoreNullProperties();
         CreateMap<EducatorDto, Educator>().IgnoreNullProperties().IgnoreProperty(dto => dto.Id);
+        CreateMap<CampusBuildingDto, CampusBuilding>().IgnoreNullProperties().IgnoreProperty(dto => dto.Id);
     }
 }
 

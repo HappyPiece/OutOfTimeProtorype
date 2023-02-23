@@ -1,5 +1,17 @@
 namespace OutOfTimePrototype.Utilities;
 
+/// <summary>
+///     Class for returning a result without throwing exception, when exception is expected and common,
+///     e.g. invalid data passed by the user
+/// </summary>
+/// <example>
+///     <code>
+/// public void Save(ClassDto classDto); // The method is Action and can't fail
+/// public List&#60;Class&#62; GetAll(); // The method is Function and can't fail
+/// public Result Create(Guid id); // The method is Action and can fail
+/// public Result&#60;Class&#62; GetBy(Guid id); // The method is Function and can fail
+/// </code>
+/// </example>
 public class Result
 {
     protected Result()
@@ -25,7 +37,7 @@ public class Result
         return new Result(e);
     }
 
-    public static Result Fail<T>(Exception e)
+    public static Result<T> Fail<T>(Exception e)
     {
         return new Result<T>(e);
     }
@@ -35,9 +47,20 @@ public class Result
         return new Result();
     }
 
-    public static Result Success<T>(T value)
+    public static Result<T> Success<T>(T value)
     {
         return new Result<T>(value);
+    }
+
+    public void Match(Action success, Action<Exception> fail)
+    {
+        if (IsSucceed) success();
+        else fail(Error);
+    }
+
+    public TResult Match<TResult>(Func<TResult> success, Func<Exception, TResult> fail)
+    {
+        return IsSucceed ? success() : fail(Error);
     }
 
     public override bool Equals(object? obj)
@@ -71,4 +94,20 @@ public class Result<T> : Result
     }
 
     public T? Value { get; }
+
+    public static implicit operator Result<T>(T value)
+    {
+        return new Result<T>(value);
+    }
+
+    public void Match(Action<T> succeed, Action<Exception> fail)
+    {
+        if (IsSucceed) succeed(Value);
+        else fail(Error);
+    }
+
+    public TResult Match<TResult>(Func<T, TResult> succeed, Func<Exception, TResult> fail)
+    {
+        return IsSucceed ? succeed(Value) : fail(Error);
+    }
 }
