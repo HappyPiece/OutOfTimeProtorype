@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using OutOfTimePrototype.Authorization;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.Dal.Models;
+using OutOfTimePrototype.Exceptions;
 using OutOfTimePrototype.Services.General.Interfaces;
 using OutOfTimePrototype.Utilities;
-using static OutOfTimePrototype.Utilities.UserUtilities;
 
 namespace OutOfTimePrototype.Controllers
 {
@@ -36,38 +36,57 @@ namespace OutOfTimePrototype.Controllers
         [HttpGet, MinRoleAuthorize(Role.Admin), Route("{id:guid}")]
         public async Task<IActionResult> GetUser([FromRoute] Guid id)
         {
-            var result = await _userService.TryGetUser(id);
-            return result.Status != UserOperationResult.OperationStatus.Success
-                ? StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message)
-                : Ok(result.User);
+            var user = await _userService.GetUser(id);
+            return user is null ? NotFound() : Ok(user);
         }
-
-        [HttpGet, MinRoleAuthorize(Role.Admin), Route("unverified")]
-        public async Task<IActionResult> GetUnverified()
+        
+        [HttpPost, MinRoleAuthorize(Role.Admin), Route("create")]
+        public async Task Create()
         {
             throw new NotImplementedException();
         }
 
-        [HttpPut, Route("{id:guid}/verify")]
-        [MinRoleAuthorize(Role.Admin)]
+        // Спорно, так как создавать отдельные эндпоинты для редактирования себя и остальных не очень круто
+        [HttpPut, MinRoleAuthorize(Role.Admin), Route("{id:guid}/edit")]
+        public async Task Edit([FromRoute] Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpDelete, MinRoleAuthorize(Role.Admin), Route("{id:guid}/delete")]
+        public async Task Delete([FromRoute] Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpGet, MinRoleAuthorize(Role.Admin), Route("{id:guid}/unverified")]
+        public async Task<IActionResult> GetUnverifiedRoles(Guid id)
+        {
+            var result = await _userService.GetUnverifiedRoles(id);
+            return result.Match<IActionResult>(
+                Ok,
+                e => e is RecordNotFoundException ? NotFound(e.Message) : StatusCode(500)
+            );
+        }
+
+        [HttpPut, MinRoleAuthorize(Role.Admin), Route("{id:guid}/verify")]
         public async Task<IActionResult> VerifyRole([FromRoute] Guid id, [FromQuery] Role role)
         {
-            var operationResult = await _userService.TryGetUser(id);
-            if (operationResult.Status is not UserOperationResult.OperationStatus.Success)
-            {
-                return StatusCode(Convert.ToInt32(operationResult.HttpStatusCode), operationResult.Message);
-            }
+            var userToApprove = await _userService.GetUser(id);
+            if (userToApprove is null)
+                return NotFound();
 
-            var roles = User.Claims.Where(x => x.Type == ClaimTypes.Role).ToList();
-            if (roles.Any(x => Enum.TryParse(x.Value, out Role userRole) && userRole.CanAssign(role)))
-            {
-                operationResult.User?.VerifiedRoles.Add(role);
-                operationResult.User?.ClaimedRoles.Remove(role);
-                await _outOfTimeDbContext.SaveChangesAsync();
-                return Ok();
-            }
+            var examinerRoleClaims = User.Claims.Where(x => x.Type == ClaimTypes.Role).ToList();
+            if (!examinerRoleClaims.Any(x =>
+                    Enum.TryParse(x.Value, out Role examinerRole) && examinerRole.CanAssign(role)))
+                return Forbid();
 
-            return StatusCode(403);
+            userToApprove.VerifiedRoles.Add(role);
+            userToApprove.ClaimedRoles.Remove(role);
+            _outOfTimeDbContext.Users.Update(userToApprove);
+            await _outOfTimeDbContext.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

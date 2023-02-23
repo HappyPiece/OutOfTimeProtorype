@@ -107,7 +107,7 @@ namespace OutOfTimePrototype.Utilities
 
         public static class RoleUtilities
         {
-            public static readonly Dictionary<Role, List<Role>> AssignHierarchy = new()
+            public static readonly Dictionary<Role, List<Role>> RoleHierarchy = new()
             {
                 { Role.Root, new List<Role> { Role.Admin, Role.ScheduleBureau, Role.Educator, Role.Student } },
                 { Role.Admin, new List<Role> { Role.ScheduleBureau, Role.Educator, Role.Student } },
@@ -124,14 +124,14 @@ namespace OutOfTimePrototype.Utilities
         {
             if (role == otherRole) return true;
             
-            return RoleUtilities.AssignHierarchy
+            return RoleUtilities.RoleHierarchy
                 .TryGetValue(role, out var canAssign) && canAssign.Contains(otherRole);
         }
         
         public static bool CanAssign(this Role role, Role otherRole)
         {
-            return RoleUtilities.AssignHierarchy
-                .TryGetValue(role, out var canAssign) && canAssign.Contains(otherRole);
+            return RoleUtilities.RoleHierarchy
+                .TryGetValue(role, out var roles) && roles.Contains(otherRole);
         }
     }
 }

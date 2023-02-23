@@ -1,11 +1,14 @@
-﻿using OutOfTimePrototype.Dto;
+﻿using OutOfTimePrototype.Dal.Models;
+using OutOfTimePrototype.Dto;
+using OutOfTimePrototype.Utilities;
 using static OutOfTimePrototype.Utilities.UserUtilities;
 
 namespace OutOfTimePrototype.Services.General.Interfaces
 {
     public interface IUserService
     {
-        Task<UserOperationResult> TryGetUser(Guid id);
+        Task<User?> GetUser(Guid id);
         Task<UserOperationResult> TryRegisterUser(UserDto userDto);
+        Task<Result<List<Role>>> GetUnverifiedRoles(Guid id);
     }
 }

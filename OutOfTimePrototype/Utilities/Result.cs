@@ -17,7 +17,7 @@ public class Result
     protected Result()
     {
         State = ResultState.Succeed;
-        Error = default;
+        Error = null;
     }
 
     protected Result(Exception error)
@@ -29,8 +29,8 @@ public class Result
     public Exception? Error { get; }
     protected ResultState State { get; }
 
-    public bool IsSucceed => State == ResultState.Succeed;
-    public bool IsFailed => State == ResultState.Failed;
+    public bool IsSucceed => State == ResultState.Succeed && Error == null;
+    public bool IsFailed => State == ResultState.Failed && Error != null;
 
     public static Result Fail(Exception e)
     {
@@ -52,7 +52,7 @@ public class Result
         return new Result<T>(value);
     }
 
-    public void Match(System.Action success, Action<Exception> fail)
+    public void Match(Action success, Action<Exception> fail)
     {
         if (IsSucceed) success();
         else fail(Error);
@@ -98,6 +98,11 @@ public class Result<T> : Result
     public static implicit operator Result<T>(T value)
     {
         return new Result<T>(value);
+    }
+
+    public static implicit operator Result<T>(Exception exception)
+    {
+        return new Result<T>(exception);
     }
 
     public void Match(Action<T> succeed, Action<Exception> fail)

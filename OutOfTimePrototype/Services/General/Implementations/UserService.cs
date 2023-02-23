@@ -10,8 +10,10 @@ using OutOfTimePrototype.Services.Interfaces;
 using OutOfTimePrototype.Utilities;
 using System.ComponentModel;
 using System.Diagnostics.Metrics;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Extensions;
+using OutOfTimePrototype.Exceptions;
 using static OutOfTimePrototype.Utilities.UserUtilities;
 using static OutOfTimePrototype.Utilities.UserUtilities.UserOperationResult;
 using Role = OutOfTimePrototype.Dal.Models.Role;
@@ -29,16 +31,11 @@ namespace OutOfTimePrototype.Services.General.Implementations
             _clusterService = clusterService;
         }
 
-        public async Task<UserOperationResult> TryGetUser(Guid id)
+        public async Task<User?> GetUser(Guid id)
         {
-            var user = await _outOfTimeDbContext.Users.SingleOrDefaultAsync(x => x.Id == id);
-            return user == null
-                ? GenerateDefaultOperationResult(OperationStatus.NotFound, id.ToString())
-                : GenerateDefaultOperationResult(OperationStatus.Success, user: user);
-
-            throw new InvalidEnumArgumentException(user.AccountType.ToString());
+            return await _outOfTimeDbContext.Users.FindAsync(id);
         }
-        
+
         public async Task<UserOperationResult> TryRegisterUser(UserDto userDto)
         {
             if (await _outOfTimeDbContext.Users.AnyAsync(x => (x.Email == userDto.Email)))
@@ -81,6 +78,18 @@ namespace OutOfTimePrototype.Services.General.Implementations
             await _outOfTimeDbContext.SaveChangesAsync();
 
             return GenerateDefaultOperationResult(OperationStatus.UserRegistered, user.Id.ToString());
+        }
+
+        public async Task<Result<List<Role>>> GetUnverifiedRoles(Guid id)
+        {
+            var user = await _outOfTimeDbContext.Users.FindAsync(id);
+
+            if (user is null)
+            {
+                return new RecordNotFoundException($"User with id '{id.ToString()}' does not exists");
+            }
+            
+            return user.ClaimedRoles;
         }
     }
 }
