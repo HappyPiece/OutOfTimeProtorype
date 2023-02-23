@@ -5,7 +5,7 @@ using OutOfTimePrototype.Services;
 
 namespace OutOfTimePrototype.Controllers;
 
-[Route("api/educator")]
+[Route("api/campus_building")]
 [ApiController]
 public class CampusBuildingController : ControllerBase
 {
