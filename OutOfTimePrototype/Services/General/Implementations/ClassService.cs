@@ -1,12 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using OutOfTimePrototype.Configurations;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.Dto;
 using OutOfTimePrototype.DTO;
 using OutOfTimePrototype.Services.Interfaces;
 using System.Diagnostics.Metrics;
+using OutOfTimePrototype.Utilities;
 using static OutOfTimePrototype.Utilities.ClassUtilities;
 using static OutOfTimePrototype.Utilities.ClassUtilities.ClassOperationResult;
+using LanguageExt.ClassInstances;
 
 
 namespace OutOfTimePrototype.Services.Implementations
@@ -78,7 +81,12 @@ namespace OutOfTimePrototype.Services.Implementations
                 classes = classes.Where(x => x.LectureHall == lectureHall);
             }
 
-            classes = classes.OrderByDescending(x => DateOnly.FromDateTime(x.Date)).Take(42);
+            var cardinality = await classes.OrderByDescending(x => DateOnly.FromDateTime(x.Date)).CountAsync();
+            if (cardinality > Constants.MaxQuerySize)
+            {
+                return GenerateDefaultOperationResult(OperationStatus.QueryTooLarge);
+            }
+            classes = classes.OrderByDescending(x => DateOnly.FromDateTime(x.Date)).Take(Constants.MaxQuerySize);
 
             var result = await classes.ToListAsync();
 
@@ -86,6 +94,11 @@ namespace OutOfTimePrototype.Services.Implementations
         }
 
         public async Task<ClassOperationResult> TryDeleteClass(Guid id)
+        {
+            return await TryDeleteClass(id, false);
+        }
+
+        private async Task<ClassOperationResult> TryDeleteClass(Guid id, bool isTransactionUnit = false)
         {
             Class? @class = await _outOfTimeDbContext.Classes.SingleOrDefaultAsync(x => x.Id == id);
 
@@ -95,12 +108,26 @@ namespace OutOfTimePrototype.Services.Implementations
             }
 
             _outOfTimeDbContext.Classes.Remove(@class);
-            await _outOfTimeDbContext.SaveChangesAsync();
 
+            if (!isTransactionUnit)
+            {
+                await _outOfTimeDbContext.SaveChangesAsync();
+            }
+            
             return GenerateDefaultOperationResult(OperationStatus.ClassDeleted, id.ToString());
         }
 
+        public async Task<ClassOperationResult> TryDeleteClasses(ClassQueryDto classQueryDto)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<ClassOperationResult> TryCreateClass(ClassDto classDto)
+        {
+            return await TryCreateClass(classDto, false);
+        }
+
+        private async Task<ClassOperationResult> TryCreateClass(ClassDto classDto, bool isTransactionUnit = false)
         {
             TimeSlot? timeSlot = await GetTimeSlotIfExists(classDto.TimeSlotNumber);
             if (timeSlot is null)
@@ -151,13 +178,49 @@ namespace OutOfTimePrototype.Services.Implementations
             }
 
             await _outOfTimeDbContext.Classes.AddAsync(newClass);
-            await _outOfTimeDbContext.SaveChangesAsync();
+
+            if (!isTransactionUnit)
+            {
+                await _outOfTimeDbContext.SaveChangesAsync();
+            }
 
             return GenerateDefaultOperationResult(status: OperationStatus.ClassCreated, arg: newClass.Id.ToString());
         }
 
+        public async Task<ClassOperationResult> TryCreateClasses(ClassQueryDto classQueryDto, ClassDto classDto)
+        {
+            if (!classQueryDto.ValidateAsForCreateClasses().IsValid)
+            {
+                return GenerateDefaultOperationResult(OperationStatus.BadQuery, modelState: classQueryDto.ValidateAsForCreateClasses());
+            }
+
+            var dates = classQueryDto.DayOfWeek.GetDayOfWeekFromBetweenDates(
+                classQueryDto.StartDate ?? throw new ArgumentNullException(), 
+                classQueryDto.EndDate ?? throw new ArgumentNullException());
+
+            var @class = classDto;
+
+            foreach (var date in dates)
+            {
+                @class.Date = date;
+                var interimResult = await TryCreateClass(@class, isTransactionUnit: true);
+                if (interimResult.Status is not OperationStatus.ClassCreated)
+                {
+                    return interimResult;
+                }
+            }
+
+            await _outOfTimeDbContext.SaveChangesAsync();
+
+            return GenerateDefaultOperationResult(status: OperationStatus.ClassesCreated, arg: dates.Count.ToString());
+        }
 
         public async Task<ClassOperationResult> TryEditClass(Guid id, ClassEditDto classEditDto, bool nullMode = false)
+        {
+            return await TryEditClass(id, classEditDto, nullMode, false);
+        }
+
+        private async Task<ClassOperationResult> TryEditClass(Guid id, ClassEditDto classEditDto, bool nullMode = false, bool isTransactionUnit = false)
         {
             Class? @class = await _outOfTimeDbContext.Classes
                 .Include(x => x.TimeSlot)
@@ -254,6 +317,11 @@ namespace OutOfTimePrototype.Services.Implementations
             await _outOfTimeDbContext.SaveChangesAsync();
 
             return GenerateDefaultOperationResult(status: OperationStatus.ClassEdited, arg: @class.Id.ToString());
+        }
+
+        public async Task<ClassOperationResult> TryEditClasses(ClassQueryDto classQueryDto, ClassEditDto classEditDto, bool nullMode)
+        {
+            throw new NotImplementedException();
         }
 
         private async Task<ClassOperationResult> CheckConflictPresent(Class newClass, Guid? thisClassId = null)

@@ -1,4 +1,5 @@
-﻿using OutOfTimePrototype.DAL.Models;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using OutOfTimePrototype.DAL.Models;
 using System.Net;
 
 namespace OutOfTimePrototype.Utilities
@@ -8,16 +9,18 @@ namespace OutOfTimePrototype.Utilities
         public class ClassOperationResult
         {
             public OperationStatus? Status { get; set; }
+            public ModelStateDictionary? ModelState { get; set; } 
             public string? Message { get; set; }
             public List<Class>? QueryResult { get; set; }
             public HttpStatusCode HttpStatusCode { get; set; }
-            public ClassOperationResult(OperationStatus operationStatus, HttpStatusCode httpStatusCode, 
-                string? errorMessage = null, List<Class>? queryResult = null)
+            public ClassOperationResult(OperationStatus operationStatus, HttpStatusCode httpStatusCode,
+                string? errorMessage = null, List<Class>? queryResult = null, ModelStateDictionary? modelState = null)
             {
                 Status = operationStatus;
                 Message = errorMessage;
                 HttpStatusCode = httpStatusCode;
                 QueryResult = queryResult;
+                ModelState = modelState;
             }
             
 
@@ -25,8 +28,11 @@ namespace OutOfTimePrototype.Utilities
             {
                 Success,
                 ClassCreated,
+                ClassesCreated,
                 ClassEdited,
+                ClassesEdited,
                 ClassDeleted,
+                ClassesDeleted,
                 TimeSlotNotFound,
                 ClusterNotFound,
                 ClusterOccupied,
@@ -38,7 +44,9 @@ namespace OutOfTimePrototype.Utilities
                 ClassNotFound,
                 UnspecifiedDate,
                 UnspecifiedCluster,
-                UnspecifiedTimeSlot
+                UnspecifiedTimeSlot,
+                BadQuery,
+                QueryTooLarge
             }
 
             /// <summary>
@@ -48,10 +56,15 @@ namespace OutOfTimePrototype.Utilities
             /// <param name="status"></param>
             /// <param name="arg"></param>
             /// <param name="queryResult"></param>
+            /// <param name="modelState"></param>
             /// <returns></returns>
-            public static ClassOperationResult GenerateDefaultOperationResult(OperationStatus status, string? arg = null, List<Class>? queryResult = null)
+            public static ClassOperationResult GenerateDefaultOperationResult(
+                OperationStatus status, 
+                string? arg = null, 
+                List<Class>? queryResult = null, 
+                ModelStateDictionary? modelState = null)
             {
-                string message = "";
+                string message = "Undefined";
                 HttpStatusCode httpStatusCode = HttpStatusCode.InternalServerError;
                 switch (status)
                 {
@@ -67,15 +80,33 @@ namespace OutOfTimePrototype.Utilities
                             httpStatusCode = HttpStatusCode.Created;
                             break;
                         }
+                    case OperationStatus.ClassesCreated:
+                        {
+                            message = $"{arg} classes were successfully created";
+                            httpStatusCode = HttpStatusCode.Created;
+                            break;
+                        }
                     case OperationStatus.ClassEdited:
                         {
                             message = $"Class with id {arg} was successfully edited";
                             httpStatusCode = HttpStatusCode.OK;
                             break;
                         }
+                    case OperationStatus.ClassesEdited:
+                        {
+                            message = $"{arg} classes were successfully edited";
+                            httpStatusCode = HttpStatusCode.OK;
+                            break;
+                        }
                     case OperationStatus.ClassDeleted:
                         {
                             message = $"Class with id {arg} was successfully deleted";
+                            httpStatusCode = HttpStatusCode.OK;
+                            break;
+                        }
+                    case OperationStatus.ClassesDeleted:
+                        {
+                            message = $"{arg} classes were successfully deleted";
                             httpStatusCode = HttpStatusCode.OK;
                             break;
                         }
@@ -151,8 +182,20 @@ namespace OutOfTimePrototype.Utilities
                             httpStatusCode = HttpStatusCode.BadRequest;
                             break;
                         }
+                    case OperationStatus.BadQuery:
+                        {
+                            message = $"Query is not correct for given context";
+                            httpStatusCode = HttpStatusCode.BadRequest;
+                            break;
+                        }
+                    case OperationStatus.QueryTooLarge:
+                        {
+                            message = $"Query result is too large. Try splitting it up into smaller portions";
+                            httpStatusCode = HttpStatusCode.BadRequest;
+                            break;
+                        }
                 }
-                return new ClassOperationResult(status, httpStatusCode, errorMessage: message, queryResult: queryResult);
+                return new ClassOperationResult(status, httpStatusCode, errorMessage: message, queryResult: queryResult, modelState: modelState);
             }
         }
     }

@@ -109,18 +109,4 @@ namespace OutOfTimePrototype.Utilities
         }
 
     }
-    public static class RoleExtensions
-    {
-        public static bool CanAssign(this Role role, Role assignRole)
-        {
-            if (RoleUtilities.AssignHierarchy.TryGetValue(role, out var canAssign))
-            {
-                if (canAssign.Contains(assignRole))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
 }

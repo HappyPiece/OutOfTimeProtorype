@@ -39,6 +39,30 @@ namespace OutOfTimePrototype.Controllers
             return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
         }
 
+        [HttpPost, Route("create/on-day-of-week")]
+        public async Task<IActionResult> CreateClasses(ClassDto classDto,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] DayOfWeek? dayOfWeek
+            )
+        {
+            ClassQueryDto classQueryDto = new ClassQueryDto
+            {
+                StartDate = startDate,
+                EndDate = endDate,
+                DayOfWeek = dayOfWeek
+            };
+
+            var result = await _classService.TryCreateClasses(classQueryDto, classDto);
+
+            if (result.Status is OperationStatus.BadQuery)
+            {
+                return StatusCode(Convert.ToInt32(result.HttpStatusCode), new ValidationProblemDetails(result.ModelState ?? throw new ArgumentNullException("Expected ModelState to be supplied")));
+            }
+
+            return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
+        }
+
         /// <summary>
         /// Sets the properties of a class with an Id passed in the route to match the ones specified in DTO.
         /// The Id itself cannot be edited and the corresponding DTO property is ignored.
@@ -62,6 +86,35 @@ namespace OutOfTimePrototype.Controllers
             return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
         }
 
+        [HttpPost, Route("edit")]
+        public async Task<IActionResult> EditClasses(ClassEditDto classEditDto,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] string? clusterNumber,
+            [FromQuery] Guid? educatorId,
+            [FromQuery] Guid? lectureHallId,
+            [FromQuery] int? timeSlotNumber,
+            [FromQuery] DayOfWeek? dayOfWeek,
+            [FromQuery] string? classType,
+            [FromQuery] bool nullMode = false
+            )
+        {
+            ClassQueryDto classQueryDto = new ClassQueryDto
+            {
+                StartDate = startDate,
+                EndDate = endDate,
+                ClusterNumber = clusterNumber,
+                EducatorId = educatorId,
+                LectureHallId = lectureHallId,
+                DayOfWeek = dayOfWeek,
+                ClassTypeName = classType,
+                TimeSlotNumber = timeSlotNumber
+            };
+
+            var result = await _classService.TryEditClasses(classQueryDto, classEditDto, nullMode);
+            return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
+        }
+
         [HttpDelete, Route("{id}/delete")]
         public async Task<IActionResult> DeleteClass([FromRoute] Guid id)
         {
@@ -79,6 +132,9 @@ namespace OutOfTimePrototype.Controllers
         /// <param name="clusterNumber"></param>
         /// <param name="educatorId"></param>
         /// <param name="lectureHallId"></param>
+        /// <param name="dayOfWeek"></param>
+        /// <param name="classType"></param>
+        /// <param name="timeSlotNumber"></param>
         /// <remarks>
         /// Sample request which will try to retrieve classes set from 20.02.2023 through to 26.02.2023 for cluster "1337":
         /// 
@@ -93,7 +149,10 @@ namespace OutOfTimePrototype.Controllers
             [FromQuery] DateTime? endDate,
             [FromQuery] string? clusterNumber,
             [FromQuery] Guid? educatorId,
-            [FromQuery] Guid? lectureHallId
+            [FromQuery] Guid? lectureHallId,
+            [FromQuery] DayOfWeek? dayOfWeek,
+            [FromQuery] string? classType,
+            [FromQuery] int? timeSlotNumber
             )
         {
             ClassQueryDto classQueryDto = new ClassQueryDto
@@ -102,7 +161,10 @@ namespace OutOfTimePrototype.Controllers
                 EndDate = endDate,
                 ClusterNumber = clusterNumber,
                 EducatorId = educatorId,
-                LectureHallId = lectureHallId
+                LectureHallId = lectureHallId,
+                DayOfWeek = dayOfWeek,
+                ClassTypeName = classType,
+                TimeSlotNumber = timeSlotNumber
             };
 
             if (!ModelState.IsValid)
