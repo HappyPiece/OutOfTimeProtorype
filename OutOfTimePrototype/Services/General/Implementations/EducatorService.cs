@@ -4,9 +4,10 @@ using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.DTO;
 using OutOfTimePrototype.Exceptions;
+using OutOfTimePrototype.Services.Interfaces;
 using OutOfTimePrototype.Utilities;
 
-namespace OutOfTimePrototype.Services;
+namespace OutOfTimePrototype.Services.Implementations;
 
 public class EducatorService : IEducatorService
 {

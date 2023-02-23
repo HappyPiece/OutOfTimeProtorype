@@ -70,6 +70,18 @@ namespace OutOfTimePrototype.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Subjects",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Subjects", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TimeSlots",
                 columns: table => new
                 {
@@ -101,6 +113,40 @@ namespace OutOfTimePrototype.Migrations
                         principalTable: "CampusBuildings",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    Password = table.Column<string>(type: "text", nullable: false),
+                    ClaimedRoles = table.Column<int[]>(type: "integer[]", nullable: false),
+                    VerifiedRoles = table.Column<int[]>(type: "integer[]", nullable: false),
+                    AccountType = table.Column<int>(type: "integer", nullable: false),
+                    RefreshToken = table.Column<string>(type: "text", nullable: true),
+                    RefreshTokenExpiryTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    FirstName = table.Column<string>(type: "text", nullable: true),
+                    MiddleName = table.Column<string>(type: "text", nullable: true),
+                    LastName = table.Column<string>(type: "text", nullable: true),
+                    GradeBookNumber = table.Column<string>(type: "text", nullable: true),
+                    ClusterNumber = table.Column<string>(type: "text", nullable: true),
+                    ScheduleSelfId = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Clusters_ClusterNumber",
+                        column: x => x.ClusterNumber,
+                        principalTable: "Clusters",
+                        principalColumn: "Number");
+                    table.ForeignKey(
+                        name: "FK_Users_Educators_ScheduleSelfId",
+                        column: x => x.ScheduleSelfId,
+                        principalTable: "Educators",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -160,17 +206,31 @@ namespace OutOfTimePrototype.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Clusters",
+                columns: new[] { "Number", "SuperClusterNumber" },
+                values: new object[] { "9721", null });
+
+            migrationBuilder.InsertData(
+                table: "Educators",
+                columns: new[] { "Id", "FirstName", "LastName", "MiddleName" },
+                values: new object[,]
+                {
+                    { new Guid("74253563-1472-4fd8-9cc5-21e6120c8a45"), "Prepod", "Prepodov", "Prepodovich" },
+                    { new Guid("b567b9e6-4c7d-4a28-970c-e2462512de57"), "Educator", "Educatorov", "Educatorovich" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "TimeSlots",
                 columns: new[] { "Number", "EndTime", "StartTime" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2023, 2, 14, 3, 20, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 14, 1, 45, 0, 0, DateTimeKind.Utc) },
-                    { 2, new DateTime(2023, 2, 14, 5, 10, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 14, 3, 35, 0, 0, DateTimeKind.Utc) },
-                    { 3, new DateTime(2023, 2, 14, 7, 0, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 14, 5, 25, 0, 0, DateTimeKind.Utc) },
-                    { 4, new DateTime(2023, 2, 14, 9, 20, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 14, 7, 45, 0, 0, DateTimeKind.Utc) },
-                    { 5, new DateTime(2023, 2, 14, 11, 10, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 14, 9, 35, 0, 0, DateTimeKind.Utc) },
-                    { 6, new DateTime(2023, 2, 14, 13, 0, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 14, 11, 25, 0, 0, DateTimeKind.Utc) },
-                    { 7, new DateTime(2023, 2, 14, 14, 50, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 14, 13, 15, 0, 0, DateTimeKind.Utc) }
+                    { 1, new DateTime(2023, 2, 22, 3, 20, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 22, 1, 45, 0, 0, DateTimeKind.Utc) },
+                    { 2, new DateTime(2023, 2, 22, 5, 10, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 22, 3, 35, 0, 0, DateTimeKind.Utc) },
+                    { 3, new DateTime(2023, 2, 22, 7, 0, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 22, 5, 25, 0, 0, DateTimeKind.Utc) },
+                    { 4, new DateTime(2023, 2, 22, 9, 20, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 22, 7, 45, 0, 0, DateTimeKind.Utc) },
+                    { 5, new DateTime(2023, 2, 22, 11, 10, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 22, 9, 35, 0, 0, DateTimeKind.Utc) },
+                    { 6, new DateTime(2023, 2, 22, 13, 0, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 22, 11, 25, 0, 0, DateTimeKind.Utc) },
+                    { 7, new DateTime(2023, 2, 22, 14, 50, 0, 0, DateTimeKind.Utc), new DateTime(2023, 2, 22, 13, 15, 0, 0, DateTimeKind.Utc) }
                 });
 
             migrationBuilder.CreateIndex(
@@ -207,6 +267,16 @@ namespace OutOfTimePrototype.Migrations
                 name: "IX_LectureHalls_HostBuildingId",
                 table: "LectureHalls",
                 column: "HostBuildingId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_ClusterNumber",
+                table: "Users",
+                column: "ClusterNumber");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_ScheduleSelfId",
+                table: "Users",
+                column: "ScheduleSelfId");
         }
 
         /// <inheritdoc />
@@ -216,19 +286,25 @@ namespace OutOfTimePrototype.Migrations
                 name: "Classes");
 
             migrationBuilder.DropTable(
+                name: "Subjects");
+
+            migrationBuilder.DropTable(
+                name: "Users");
+
+            migrationBuilder.DropTable(
                 name: "ClassTypes");
-
-            migrationBuilder.DropTable(
-                name: "Clusters");
-
-            migrationBuilder.DropTable(
-                name: "Educators");
 
             migrationBuilder.DropTable(
                 name: "LectureHalls");
 
             migrationBuilder.DropTable(
                 name: "TimeSlots");
+
+            migrationBuilder.DropTable(
+                name: "Clusters");
+
+            migrationBuilder.DropTable(
+                name: "Educators");
 
             migrationBuilder.DropTable(
                 name: "CampusBuildings");

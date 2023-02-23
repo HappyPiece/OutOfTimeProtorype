@@ -126,6 +126,12 @@ namespace OutOfTimePrototype.Migrations
                     b.HasIndex("SuperClusterNumber");
 
                     b.ToTable("Clusters");
+
+                    b.HasData(
+                        new
+                        {
+                            Number = "9721"
+                        });
                 });
 
             modelBuilder.Entity("OutOfTimePrototype.DAL.Models.Educator", b =>
@@ -148,6 +154,22 @@ namespace OutOfTimePrototype.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Educators");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("b567b9e6-4c7d-4a28-970c-e2462512de57"),
+                            FirstName = "Educator",
+                            LastName = "Educatorov",
+                            MiddleName = "Educatorovich"
+                        },
+                        new
+                        {
+                            Id = new Guid("74253563-1472-4fd8-9cc5-21e6120c8a45"),
+                            FirstName = "Prepod",
+                            LastName = "Prepodov",
+                            MiddleName = "Prepodovich"
+                        });
                 });
 
             modelBuilder.Entity("OutOfTimePrototype.DAL.Models.LectureHall", b =>
@@ -195,45 +217,118 @@ namespace OutOfTimePrototype.Migrations
                         new
                         {
                             Number = 1,
-                            EndTime = new DateTime(2023, 2, 14, 3, 20, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 1, 45, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 22, 3, 20, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 22, 1, 45, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 2,
-                            EndTime = new DateTime(2023, 2, 14, 5, 10, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 3, 35, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 22, 5, 10, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 22, 3, 35, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 3,
-                            EndTime = new DateTime(2023, 2, 14, 7, 0, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 5, 25, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 22, 7, 0, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 22, 5, 25, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 4,
-                            EndTime = new DateTime(2023, 2, 14, 9, 20, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 7, 45, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 22, 9, 20, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 22, 7, 45, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 5,
-                            EndTime = new DateTime(2023, 2, 14, 11, 10, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 9, 35, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 22, 11, 10, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 22, 9, 35, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 6,
-                            EndTime = new DateTime(2023, 2, 14, 13, 0, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 11, 25, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 22, 13, 0, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 22, 11, 25, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 7,
-                            EndTime = new DateTime(2023, 2, 14, 14, 50, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 14, 13, 15, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 22, 14, 50, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 22, 13, 15, 0, 0, DateTimeKind.Utc)
                         });
+                });
+
+            modelBuilder.Entity("OutOfTimePrototype.Dal.Models.Subject", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Subjects");
+                });
+
+            modelBuilder.Entity("OutOfTimePrototype.Dal.Models.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AccountType")
+                        .HasColumnType("integer");
+
+                    b.Property<int[]>("ClaimedRoles")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
+
+                    b.Property<string>("ClusterNumber")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("GradeBookNumber")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MiddleName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ScheduleSelfId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int[]>("VerifiedRoles")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClusterNumber");
+
+                    b.HasIndex("ScheduleSelfId");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("OutOfTimePrototype.DAL.Models.Class", b =>
@@ -291,6 +386,21 @@ namespace OutOfTimePrototype.Migrations
                         .IsRequired();
 
                     b.Navigation("HostBuilding");
+                });
+
+            modelBuilder.Entity("OutOfTimePrototype.Dal.Models.User", b =>
+                {
+                    b.HasOne("OutOfTimePrototype.DAL.Models.Cluster", "Cluster")
+                        .WithMany()
+                        .HasForeignKey("ClusterNumber");
+
+                    b.HasOne("OutOfTimePrototype.DAL.Models.Educator", "ScheduleSelf")
+                        .WithMany()
+                        .HasForeignKey("ScheduleSelfId");
+
+                    b.Navigation("Cluster");
+
+                    b.Navigation("ScheduleSelf");
                 });
 
             modelBuilder.Entity("OutOfTimePrototype.DAL.Models.CampusBuilding", b =>
