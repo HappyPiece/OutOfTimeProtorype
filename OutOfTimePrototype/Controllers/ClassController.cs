@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.DTO;
-using OutOfTimePrototype.Services;
 using System.Web;
 using System;
 using static OutOfTimePrototype.Utilities.ClassUtilities.ClassOperationResult;
 using System.Collections.Specialized;
 using System.Security.Claims;
 using OutOfTimePrototype.Dto;
+using OutOfTimePrototype.Services.Interfaces;
 
 namespace OutOfTimePrototype.Controllers
 {
@@ -112,7 +112,7 @@ namespace OutOfTimePrototype.Controllers
 
             var result = await _classService.QueryClasses(classQueryDto);
 
-            if (result.Status is not ClassOperationStatus.Success)
+            if (result.Status is not OperationStatus.Success)
             {
                 return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
             }

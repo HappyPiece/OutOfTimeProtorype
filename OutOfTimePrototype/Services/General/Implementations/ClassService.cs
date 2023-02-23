@@ -3,18 +3,19 @@ using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.Dto;
 using OutOfTimePrototype.DTO;
+using OutOfTimePrototype.Services.Interfaces;
 using System.Diagnostics.Metrics;
 using static OutOfTimePrototype.Utilities.ClassUtilities;
 using static OutOfTimePrototype.Utilities.ClassUtilities.ClassOperationResult;
 
 
-namespace OutOfTimePrototype.Services
+namespace OutOfTimePrototype.Services.Implementations
 {
     public class ClassService : IClassService
     {
         private readonly OutOfTimeDbContext _outOfTimeDbContext;
         private readonly IClusterService _clusterService;
-        
+
         public ClassService(OutOfTimeDbContext outOfTimeDbContext, IClusterService clusterService)
         {
             _outOfTimeDbContext = outOfTimeDbContext;
@@ -29,8 +30,7 @@ namespace OutOfTimePrototype.Services
                 .Include(x => x.Educator)
                 .Include(x => x.LectureHall)
                 .Include(x => x.Type)
-                .OrderByDescending(x => DateOnly.FromDateTime(x.Date))
-                .Take(42);
+                .AsQueryable();
 
             if (classQueryDto.StartDate is not null)
             {
@@ -49,7 +49,7 @@ namespace OutOfTimePrototype.Services
                 var cluster = await _outOfTimeDbContext.Clusters.Include(x => x.SuperCluster).SingleOrDefaultAsync(x => x.Number == classQueryDto.ClusterNumber);
                 if (cluster is null)
                 {
-                    return GenerateDefaultClassOperationResult(ClassOperationStatus.ClusterNotFound, classQueryDto.ClusterNumber);
+                    return GenerateDefaultOperationResult(OperationStatus.ClusterNotFound, classQueryDto.ClusterNumber);
                 }
                 var associatedClusters = await _clusterService.GetAssociatedClusters(cluster);
 
@@ -61,7 +61,7 @@ namespace OutOfTimePrototype.Services
                 var educator = await _outOfTimeDbContext.Educators.SingleOrDefaultAsync(x => x.Id == classQueryDto.EducatorId);
                 if (educator is null)
                 {
-                    return GenerateDefaultClassOperationResult(ClassOperationStatus.EducatorNotFound, classQueryDto.EducatorId.ToString());
+                    return GenerateDefaultOperationResult(OperationStatus.EducatorNotFound, classQueryDto.EducatorId.ToString());
                 }
 
                 classes = classes.Where(x => x.Educator == educator);
@@ -72,15 +72,17 @@ namespace OutOfTimePrototype.Services
                 var lectureHall = await _outOfTimeDbContext.LectureHalls.SingleOrDefaultAsync(x => x.Id == classQueryDto.LectureHallId);
                 if (lectureHall is null)
                 {
-                    return GenerateDefaultClassOperationResult(ClassOperationStatus.LectureHallNotFound, classQueryDto.LectureHallId.ToString());
+                    return GenerateDefaultOperationResult(OperationStatus.LectureHallNotFound, classQueryDto.LectureHallId.ToString());
                 }
 
                 classes = classes.Where(x => x.LectureHall == lectureHall);
             }
 
+            classes = classes.OrderByDescending(x => DateOnly.FromDateTime(x.Date)).Take(42);
+
             var result = await classes.ToListAsync();
 
-            return GenerateDefaultClassOperationResult(ClassOperationStatus.Success, queryResult: result);
+            return GenerateDefaultOperationResult(OperationStatus.Success, queryResult: result);
         }
 
         public async Task<ClassOperationResult> TryDeleteClass(Guid id)
@@ -89,31 +91,31 @@ namespace OutOfTimePrototype.Services
 
             if (@class is null)
             {
-                return GenerateDefaultClassOperationResult(ClassOperationStatus.ClassNotFound, id.ToString());
+                return GenerateDefaultOperationResult(OperationStatus.ClassNotFound, id.ToString());
             }
 
             _outOfTimeDbContext.Classes.Remove(@class);
             await _outOfTimeDbContext.SaveChangesAsync();
 
-            return GenerateDefaultClassOperationResult(ClassOperationStatus.ClassDeleted, id.ToString());
+            return GenerateDefaultOperationResult(OperationStatus.ClassDeleted, id.ToString());
         }
 
         public async Task<ClassOperationResult> TryCreateClass(ClassDto classDto)
         {
             TimeSlot? timeSlot = await GetTimeSlotIfExists(classDto.TimeSlotNumber);
             if (timeSlot is null)
-                return GenerateDefaultClassOperationResult(ClassOperationStatus.TimeSlotNotFound, classDto.TimeSlotNumber.ToString());
+                return GenerateDefaultOperationResult(OperationStatus.TimeSlotNotFound, classDto.TimeSlotNumber.ToString());
 
             Cluster? cluster = await GetClusterIfExists(classDto.ClusterNumber);
             if (cluster is null)
-                return GenerateDefaultClassOperationResult(ClassOperationStatus.ClusterNotFound, classDto.ClusterNumber);
+                return GenerateDefaultOperationResult(OperationStatus.ClusterNotFound, classDto.ClusterNumber);
 
             ClassType? classType = null;
             if (classDto.ClassTypeName is not null)
             {
                 classType = await GetClassTypeIfExists(classDto.ClassTypeName);
                 if (classType is null)
-                    return GenerateDefaultClassOperationResult(ClassOperationStatus.ClassTypeNotFound, classDto.ClassTypeName);
+                    return GenerateDefaultOperationResult(OperationStatus.ClassTypeNotFound, classDto.ClassTypeName);
             }
 
             Educator? educator = null;
@@ -121,7 +123,7 @@ namespace OutOfTimePrototype.Services
             {
                 educator = await GetEducatorIfExists(classDto.EducatorId);
                 if (educator is null)
-                    return GenerateDefaultClassOperationResult(ClassOperationStatus.EducatorNotFound, classDto.EducatorId.ToString());
+                    return GenerateDefaultOperationResult(OperationStatus.EducatorNotFound, classDto.EducatorId.ToString());
             }
 
             LectureHall? lectureHall = null;
@@ -129,7 +131,7 @@ namespace OutOfTimePrototype.Services
             {
                 lectureHall = await GetLectureHallIfExists(classDto.LectureHallId);
                 if (lectureHall is null)
-                    return GenerateDefaultClassOperationResult(ClassOperationStatus.LectureHallNotFound, classDto.LectureHallId.ToString());
+                    return GenerateDefaultOperationResult(OperationStatus.LectureHallNotFound, classDto.LectureHallId.ToString());
             }
 
             var newClass = new Class
@@ -143,7 +145,7 @@ namespace OutOfTimePrototype.Services
             };
 
             var checkResult = await CheckConflictPresent(newClass);
-            if (checkResult.Status is not ClassOperationStatus.Success)
+            if (checkResult.Status is not OperationStatus.Success)
             {
                 return checkResult;
             }
@@ -151,7 +153,7 @@ namespace OutOfTimePrototype.Services
             await _outOfTimeDbContext.Classes.AddAsync(newClass);
             await _outOfTimeDbContext.SaveChangesAsync();
 
-            return GenerateDefaultClassOperationResult(status: ClassOperationStatus.ClassCreated, arg: newClass.Id.ToString());
+            return GenerateDefaultOperationResult(status: OperationStatus.ClassCreated, arg: newClass.Id.ToString());
         }
 
 
@@ -163,16 +165,16 @@ namespace OutOfTimePrototype.Services
                 .Include(x => x.Educator)
                 .Include(x => x.LectureHall)
                 .Include(x => x.Type)
-                .SingleOrDefaultAsync(x=> x.Id == id);
+                .SingleOrDefaultAsync(x => x.Id == id);
 
             if (@class is null)
             {
-                return GenerateDefaultClassOperationResult(status: ClassOperationStatus.ClassNotFound, id.ToString());
+                return GenerateDefaultOperationResult(status: OperationStatus.ClassNotFound, id.ToString());
             }
 
             if (classEditDto.Date is null && nullMode)
             {
-                return GenerateDefaultClassOperationResult(ClassOperationStatus.UnspecifiedDate);
+                return GenerateDefaultOperationResult(OperationStatus.UnspecifiedDate);
             }
 
             TimeSlot? timeSlot = null;
@@ -180,11 +182,11 @@ namespace OutOfTimePrototype.Services
             {
                 timeSlot = await GetTimeSlotIfExists(classEditDto.TimeSlotNumber);
                 if (timeSlot is null)
-                    return GenerateDefaultClassOperationResult(ClassOperationStatus.TimeSlotNotFound, classEditDto.TimeSlotNumber.ToString());
+                    return GenerateDefaultOperationResult(OperationStatus.TimeSlotNotFound, classEditDto.TimeSlotNumber.ToString());
             }
             else if (nullMode)
             {
-                return GenerateDefaultClassOperationResult(ClassOperationStatus.UnspecifiedTimeSlot);
+                return GenerateDefaultOperationResult(OperationStatus.UnspecifiedTimeSlot);
             }
 
             Cluster? cluster = null;
@@ -192,11 +194,11 @@ namespace OutOfTimePrototype.Services
             {
                 cluster = await GetClusterIfExists(classEditDto.ClusterNumber);
                 if (cluster is null)
-                    return GenerateDefaultClassOperationResult(ClassOperationStatus.ClusterNotFound, classEditDto.ClusterNumber);
+                    return GenerateDefaultOperationResult(OperationStatus.ClusterNotFound, classEditDto.ClusterNumber);
             }
             else if (nullMode)
             {
-                return GenerateDefaultClassOperationResult(ClassOperationStatus.UnspecifiedCluster);
+                return GenerateDefaultOperationResult(OperationStatus.UnspecifiedCluster);
             }
 
             ClassType? classType = null;
@@ -204,7 +206,7 @@ namespace OutOfTimePrototype.Services
             {
                 classType = await GetClassTypeIfExists(classEditDto.ClassTypeName);
                 if (classType is null)
-                    return GenerateDefaultClassOperationResult(ClassOperationStatus.ClassTypeNotFound, classEditDto.ClassTypeName);
+                    return GenerateDefaultOperationResult(OperationStatus.ClassTypeNotFound, classEditDto.ClassTypeName);
             }
 
             Educator? educator = null;
@@ -212,7 +214,7 @@ namespace OutOfTimePrototype.Services
             {
                 educator = await GetEducatorIfExists(classEditDto.EducatorId);
                 if (educator is null)
-                    return GenerateDefaultClassOperationResult(ClassOperationStatus.EducatorNotFound, classEditDto.EducatorId.ToString());
+                    return GenerateDefaultOperationResult(OperationStatus.EducatorNotFound, classEditDto.EducatorId.ToString());
             }
 
             LectureHall? lectureHall = null;
@@ -220,10 +222,10 @@ namespace OutOfTimePrototype.Services
             {
                 lectureHall = await GetLectureHallIfExists(classEditDto.LectureHallId);
                 if (lectureHall is null)
-                    return GenerateDefaultClassOperationResult(ClassOperationStatus.LectureHallNotFound, classEditDto.LectureHallId.ToString());
+                    return GenerateDefaultOperationResult(OperationStatus.LectureHallNotFound, classEditDto.LectureHallId.ToString());
             }
 
-            
+
             if (nullMode)
             {
                 @class.Date = classEditDto.Date ?? throw new ArgumentNullException();
@@ -244,14 +246,14 @@ namespace OutOfTimePrototype.Services
             }
 
             var checkResult = await CheckConflictPresent(@class, id);
-            if (checkResult.Status is not ClassOperationStatus.Success)
+            if (checkResult.Status is not OperationStatus.Success)
             {
                 return checkResult;
             }
 
             await _outOfTimeDbContext.SaveChangesAsync();
 
-            return GenerateDefaultClassOperationResult(status: ClassOperationStatus.ClassEdited, arg: @class.Id.ToString());
+            return GenerateDefaultOperationResult(status: OperationStatus.ClassEdited, arg: @class.Id.ToString());
         }
 
         private async Task<ClassOperationResult> CheckConflictPresent(Class newClass, Guid? thisClassId = null)
@@ -273,29 +275,29 @@ namespace OutOfTimePrototype.Services
             {
                 if (await concurrentClasses.AnyAsync(x => x.Cluster.Number == clust.Number))
                 {
-                    return GenerateDefaultClassOperationResult(ClassOperationStatus.ClusterOccupied, clust.Number);
+                    return GenerateDefaultOperationResult(OperationStatus.ClusterOccupied, clust.Number);
                 }
             }
 
             // checks whether the educator is busy at the specified time
-            if ((newClass.Educator is not null) ? await concurrentClasses.Where(x => x.Educator != null).AnyAsync(x => x.Educator!.Id == newClass.Educator.Id) : false)
+            if (newClass.Educator is not null ? await concurrentClasses.Where(x => x.Educator != null).AnyAsync(x => x.Educator!.Id == newClass.Educator.Id) : false)
             {
-                return GenerateDefaultClassOperationResult(ClassOperationStatus.EducatorOccupied, newClass.Educator.Id.ToString());
+                return GenerateDefaultOperationResult(OperationStatus.EducatorOccupied, newClass.Educator.Id.ToString());
             }
 
             // checks whether the lecture hall is occupied at the specified time
-            if ((newClass.LectureHall is not null) ? await concurrentClasses.Where(x => x.LectureHall != null).AnyAsync(x => x.LectureHall!.Id == newClass.LectureHall.Id) : false)
+            if (newClass.LectureHall is not null ? await concurrentClasses.Where(x => x.LectureHall != null).AnyAsync(x => x.LectureHall!.Id == newClass.LectureHall.Id) : false)
             {
-                return GenerateDefaultClassOperationResult(ClassOperationStatus.LectureHallOccupied, newClass.LectureHall.Id.ToString());
+                return GenerateDefaultOperationResult(OperationStatus.LectureHallOccupied, newClass.LectureHall.Id.ToString());
             }
 
-            return GenerateDefaultClassOperationResult(ClassOperationStatus.Success);
+            return GenerateDefaultOperationResult(OperationStatus.Success);
         }
 
         private async Task<Cluster?> GetClusterIfExists(string? number)
         {
             if (number == null) return null;
-            var cluster = await _outOfTimeDbContext.Clusters.Include(x => x.SuperCluster).SingleOrDefaultAsync(x => x.Number == number);
+            var cluster = await _clusterService.TryGetCluster(number);
             return cluster;
         }
         private async Task<TimeSlot?> GetTimeSlotIfExists(int? number)

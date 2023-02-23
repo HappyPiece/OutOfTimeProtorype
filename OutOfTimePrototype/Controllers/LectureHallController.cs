@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OutOfTimePrototype.DTO;
 using OutOfTimePrototype.Exceptions;
-using OutOfTimePrototype.Services;
+using OutOfTimePrototype.Services.Interfaces;
 
 namespace OutOfTimePrototype.Controllers;
 

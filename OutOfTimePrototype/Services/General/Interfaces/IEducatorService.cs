@@ -2,7 +2,7 @@ using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.DTO;
 using OutOfTimePrototype.Utilities;
 
-namespace OutOfTimePrototype.Services;
+namespace OutOfTimePrototype.Services.Interfaces;
 
 public interface IEducatorService
 {
