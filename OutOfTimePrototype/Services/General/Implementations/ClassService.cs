@@ -48,6 +48,12 @@ namespace OutOfTimePrototype.Services.Implementations
                 classes = classes.Where(x => DateOnly.FromDateTime(x.Date) <= DateOnly.FromDateTime(endDate));
             }
 
+            if (classQueryDto.DayOfWeek is not null)
+            {
+                DayOfWeek day = classQueryDto.DayOfWeek ?? throw new ArgumentNullException();
+                classes = classes.Where(x => x.Date.DayOfWeek == day);
+            }
+
             if (classQueryDto.ClusterNumber is not null)
             {
                 var cluster = await GetClusterIfExists(classQueryDto.ClusterNumber);
@@ -55,7 +61,12 @@ namespace OutOfTimePrototype.Services.Implementations
                 {
                     return GenerateDefaultOperationResult(OperationStatus.ClusterNotFound, classQueryDto.ClusterNumber);
                 }
-                var associatedClusters = await _clusterService.GetAssociatedClusters(cluster);
+
+                List<Cluster> associatedClusters = new List<Cluster>() { cluster };
+                if (!classQueryDto.IgnoreClusterHierarchy)
+                {
+                    associatedClusters = await _clusterService.GetAssociatedClusters(cluster);
+                }
 
                 classes = classes.Where(x => associatedClusters.Any(clust => clust == x.Cluster));
             }
@@ -230,6 +241,15 @@ namespace OutOfTimePrototype.Services.Implementations
                 return GenerateDefaultOperationResult(OperationStatus.UnspecifiedDate);
             }
 
+            if (classEditDto.DayOfWeek is not null)
+            {
+                if (classEditDto.Date is not null)
+                {
+                    return GenerateDefaultOperationResult(OperationStatus.AmbiguousDate);
+                }
+                classEditDto.Date = @class.Date.GetDayOfWeekFromThisWeek(classEditDto.DayOfWeek ?? throw new ArgumentNullException());
+            }
+
             TimeSlot? timeSlot = null;
             if (classEditDto.TimeSlotNumber is not null)
             {
@@ -286,7 +306,6 @@ namespace OutOfTimePrototype.Services.Implementations
                     return GenerateDefaultOperationResult(OperationStatus.LectureHallNotFound, classEditDto.LectureHallId.ToString());
             }
 
-
             if (nullMode)
             {
                 @class.Date = classEditDto.Date ?? throw new ArgumentNullException();
@@ -330,6 +349,7 @@ namespace OutOfTimePrototype.Services.Implementations
                 .Include(x => x.Educator)
                 .Include(x => x.LectureHall)
                 .Include(x => x.Type)
+                .Include(x => x.Subject)
                 .SingleOrDefaultAsync(x => x.Id == id);
 
             if (@class is null)

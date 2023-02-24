@@ -9,9 +9,9 @@ namespace OutOfTimePrototype.Controllers
     public class TestController : ControllerBase
     {
         [HttpGet]
-        public IActionResult Get([FromQuery] DayOfWeek dayOfWeek, DateTime startDate, DateTime endDate)
+        public IActionResult Get([FromQuery] DateTime date, DayOfWeek targetDay)
         {
-            return Ok(dayOfWeek.GetDayOfWeekFromBetweenDates(startDate, endDate));
+            return Ok(date.GetDayOfWeekFromThisWeek(targetDay));
         }
     }
 }

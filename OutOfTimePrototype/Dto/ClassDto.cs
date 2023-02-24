@@ -48,6 +48,8 @@ namespace OutOfTimePrototype.DTO
 
         public string? ClassTypeName { get; set; } 
 
+        public DayOfWeek? DayOfWeek { get; set; }
+
         public void Format()
         {
             if (Date is not null)
