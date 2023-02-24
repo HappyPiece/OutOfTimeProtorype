@@ -1,4 +1,6 @@
-﻿namespace OutOfTimePrototype.DAL.Models
+﻿using OutOfTimePrototype.Dal.Models;
+
+namespace OutOfTimePrototype.DAL.Models
 {
     public class Class
     {
@@ -15,5 +17,7 @@
         public LectureHall? LectureHall { get; set; }
 
         public Educator? Educator { get; set; } 
+
+        public Subject? Subject { get; set; }
     }
 }
