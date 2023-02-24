@@ -1,22 +1,15 @@
-﻿using LanguageExt.Pipes;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using OutOfTimePrototype.Configurations;
-using OutOfTimePrototype.Dal.Models;
 using OutOfTimePrototype.DAL;
+using OutOfTimePrototype.Dal.Models;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.Dto;
+using OutOfTimePrototype.Exceptions;
 using OutOfTimePrototype.Services.General.Interfaces;
 using OutOfTimePrototype.Services.Interfaces;
 using OutOfTimePrototype.Utilities;
-using System.ComponentModel;
-using System.Diagnostics.Metrics;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.OpenApi.Extensions;
-using OutOfTimePrototype.Exceptions;
 using static OutOfTimePrototype.Utilities.UserUtilities;
 using static OutOfTimePrototype.Utilities.UserUtilities.UserOperationResult;
-using Role = OutOfTimePrototype.Dal.Models.Role;
 
 namespace OutOfTimePrototype.Services.General.Implementations
 {
@@ -24,16 +17,58 @@ namespace OutOfTimePrototype.Services.General.Implementations
     {
         private readonly OutOfTimeDbContext _outOfTimeDbContext;
         private readonly IClusterService _clusterService;
+        private readonly IMapper _mapper;
 
-        public UserService(OutOfTimeDbContext outOfTimeDbContext, IClusterService clusterService)
+        public UserService(OutOfTimeDbContext outOfTimeDbContext, IClusterService clusterService, IMapper mapper)
         {
             _outOfTimeDbContext = outOfTimeDbContext;
             _clusterService = clusterService;
+            _mapper = mapper;
         }
 
         public async Task<User?> GetUser(Guid id)
         {
             return await _outOfTimeDbContext.Users.FindAsync(id);
+        }
+
+        public async Task<UserOperationResult> EditUser(Guid id, UserDto userDto)
+        {
+            var dbUser = await _outOfTimeDbContext.Users.FindAsync(id);
+
+            if (dbUser is null)
+            {
+                return GenerateDefaultOperationResult(OperationStatus.NotFound, arg: id.ToString());
+            }
+
+            if (await _outOfTimeDbContext.Users.AnyAsync(user => user.Email == userDto.Email))
+            {
+                return GenerateDefaultOperationResult(OperationStatus.EmailAlreadyInUse, userDto.Email);
+            }
+
+            if (!await _outOfTimeDbContext.Clusters.AnyAsync(cluster => cluster.Number == userDto.ClusterNumber))
+            {
+                return GenerateDefaultOperationResult(OperationStatus.ClusterNotFound, userDto.ClusterNumber);
+            }
+
+            var updatedUser = _mapper.Map(userDto, dbUser);
+            _outOfTimeDbContext.Users.Update(updatedUser);
+            await _outOfTimeDbContext.SaveChangesAsync();
+
+            return GenerateDefaultOperationResult(OperationStatus.UserEdited, id.ToString());
+        }
+
+        public async Task<UserOperationResult> DeleteUser(Guid id)
+        {
+            if (!await _outOfTimeDbContext.Users.AnyAsync(user => user.Id == id))
+            {
+                return GenerateDefaultOperationResult(OperationStatus.NotFound, id.ToString());
+            }
+
+            var userToDelete = new User { Id = id };
+            _outOfTimeDbContext.Users.Remove(userToDelete);
+            await _outOfTimeDbContext.SaveChangesAsync();
+
+            return GenerateDefaultOperationResult(OperationStatus.UserDeleted, id.ToString());
         }
 
         public async Task<UserOperationResult> TryRegisterUser(UserDto userDto)
@@ -74,7 +109,7 @@ namespace OutOfTimePrototype.Services.General.Implementations
                     break;
             }
 
-            await _outOfTimeDbContext.Users.AddAsync(user);
+            _outOfTimeDbContext.Users.Add(user);
             await _outOfTimeDbContext.SaveChangesAsync();
 
             return GenerateDefaultOperationResult(OperationStatus.UserRegistered, user.Id.ToString());
@@ -88,7 +123,7 @@ namespace OutOfTimePrototype.Services.General.Implementations
             {
                 return new RecordNotFoundException($"User with id '{id.ToString()}' does not exists");
             }
-            
+
             return user.ClaimedRoles;
         }
     }

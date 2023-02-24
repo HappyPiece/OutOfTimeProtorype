@@ -1,7 +1,6 @@
-﻿using OutOfTimePrototype.Dal.Models;
-using OutOfTimePrototype.Dto;
-using System.Net;
-using static OutOfTimePrototype.Utilities.ClassUtilities;
+﻿using System.Net;
+using Microsoft.AspNetCore.Mvc;
+using OutOfTimePrototype.Dal.Models;
 using static OutOfTimePrototype.Utilities.UserUtilities;
 
 namespace OutOfTimePrototype.Utilities
@@ -102,6 +101,37 @@ namespace OutOfTimePrototype.Utilities
 
                 return new UserOperationResult(status, httpStatusCode, errorMessage: message, queryResult: queryResult,
                     user: user);
+            }
+
+            public static IActionResult ToIActionResult(UserOperationResult userOperationResult) {
+                switch (userOperationResult.Status)
+                {
+                    case OperationStatus.Success:
+                        if (userOperationResult.User is not null)
+                            return new OkObjectResult(userOperationResult.User);
+                        return new OkResult();
+                    case OperationStatus.UserRegistered:
+                        if (userOperationResult.User is not null)
+                            return new CreatedResult($"api/users/{userOperationResult.User.Id}", userOperationResult.User);
+                        return new NoContentResult();
+                    case OperationStatus.UserEdited:
+                    case OperationStatus.UserDeleted:
+                        return new NoContentResult();
+                    case OperationStatus.NotFound:
+                        if (userOperationResult.Message is not null)
+                            return new NotFoundObjectResult(userOperationResult.Message);
+                        return new NotFoundResult();
+                    case OperationStatus.ClusterNotFound:
+                        if (userOperationResult.Message is not null)
+                            return new BadRequestObjectResult(userOperationResult.Message);
+                        return new BadRequestResult();
+                    case OperationStatus.EmailAlreadyInUse:
+                        if (userOperationResult.User is not null)
+                            return new ConflictObjectResult(userOperationResult.User.Email);
+                        return new ConflictResult();
+                    default:
+                        return new StatusCodeResult((int)HttpStatusCode.InternalServerError);
+                }
             }
         }
 

@@ -1,7 +1,9 @@
 using System.Linq.Expressions;
 using AutoMapper;
 using LanguageExt.ClassInstances;
+using OutOfTimePrototype.Dal.Models;
 using OutOfTimePrototype.DAL.Models;
+using OutOfTimePrototype.Dto;
 using OutOfTimePrototype.DTO;
 
 namespace OutOfTimePrototype.Config;
@@ -14,6 +16,7 @@ public class MappingProfile : Profile
         CreateMap<LectureHallUpdateDto, LectureHall>().IgnoreNullProperties();
         CreateMap<EducatorDto, Educator>().IgnoreNullProperties().IgnoreProperty(dto => dto.Id);
         CreateMap<CampusBuildingDto, CampusBuilding>().IgnoreNullProperties().IgnoreProperty(dto => dto.Id);
+        CreateMap<UserDto, User>().IgnoreNullProperties().IgnoreProperty(dto => dto.Id);
     }
 }
 

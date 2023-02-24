@@ -11,8 +11,7 @@ namespace OutOfTimePrototype.Dto
     {
         public Guid Id { get; set; }
 
-        //[EmailAddress]
-        public string Email { get; set; }
+        [EmailAddress] public string Email { get; set; }
 
         public string? Password { get; set; }
 
@@ -60,16 +59,14 @@ namespace OutOfTimePrototype.Dto
         public ModelStateDictionary Validate()
         {
             var result = new ModelStateDictionary();
+
+            // General errors
             if (!new EmailAddressAttribute().IsValid(Email))
             {
-                result.AddModelError("email", $"'{Email}' is not a valid Email adress");
-            }     
-            return result;
-        }
+                result.AddModelError("email", $"'{Email}' is not a valid Email address");
+            }
 
-        public ModelStateDictionary Validate(AccountType accountType)
-        {
-            throw new NotImplementedException();
+            return result;
         }
     }
 }
