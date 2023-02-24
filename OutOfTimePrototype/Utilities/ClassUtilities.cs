@@ -12,17 +12,18 @@ namespace OutOfTimePrototype.Utilities
             public ModelStateDictionary? ModelState { get; set; } 
             public string? Message { get; set; }
             public List<Class>? QueryResult { get; set; }
+            public Class? OperationResult { get; set; }
             public HttpStatusCode HttpStatusCode { get; set; }
             public ClassOperationResult(OperationStatus operationStatus, HttpStatusCode httpStatusCode,
-                string? errorMessage = null, List<Class>? queryResult = null, ModelStateDictionary? modelState = null)
+                string? errorMessage = null, List<Class>? queryResult = null, ModelStateDictionary? modelState = null, Class? operationResult = null)
             {
                 Status = operationStatus;
                 Message = errorMessage;
                 HttpStatusCode = httpStatusCode;
                 QueryResult = queryResult;
                 ModelState = modelState;
-            }
-            
+                OperationResult = operationResult;
+            }      
 
             public enum OperationStatus
             {
@@ -39,6 +40,7 @@ namespace OutOfTimePrototype.Utilities
                 LectureHallNotFound,
                 LectureHallOccupied,
                 EducatorNotFound,
+                SubjectNotFound,
                 EducatorOccupied,
                 ClassTypeNotFound,
                 ClassNotFound,
@@ -55,14 +57,17 @@ namespace OutOfTimePrototype.Utilities
             /// </summary>
             /// <param name="status"></param>
             /// <param name="arg"></param>
-            /// <param name="queryResult"></param>
+            /// <param name="queryResult">Contains a list of classes which were selected in case it was query request and null otherwise</param>
             /// <param name="modelState"></param>
+            /// <param name="operationResult"></param>
             /// <returns></returns>
             public static ClassOperationResult GenerateDefaultOperationResult(
                 OperationStatus status, 
                 string? arg = null, 
                 List<Class>? queryResult = null, 
-                ModelStateDictionary? modelState = null)
+                ModelStateDictionary? modelState = null,
+                Class? operationResult = null
+                )
             {
                 string message = "Undefined";
                 HttpStatusCode httpStatusCode = HttpStatusCode.InternalServerError;
@@ -82,7 +87,7 @@ namespace OutOfTimePrototype.Utilities
                         }
                     case OperationStatus.ClassesCreated:
                         {
-                            message = $"{arg} classes were successfully created";
+                            message = $"{arg} class(es) were successfully created";
                             httpStatusCode = HttpStatusCode.Created;
                             break;
                         }
@@ -94,7 +99,7 @@ namespace OutOfTimePrototype.Utilities
                         }
                     case OperationStatus.ClassesEdited:
                         {
-                            message = $"{arg} classes were successfully edited";
+                            message = $"{arg} class(es) were successfully edited";
                             httpStatusCode = HttpStatusCode.OK;
                             break;
                         }
@@ -106,7 +111,7 @@ namespace OutOfTimePrototype.Utilities
                         }
                     case OperationStatus.ClassesDeleted:
                         {
-                            message = $"{arg} classes were successfully deleted";
+                            message = $"{arg} class(es) were successfully deleted";
                             httpStatusCode = HttpStatusCode.OK;
                             break;
                         }
@@ -152,6 +157,12 @@ namespace OutOfTimePrototype.Utilities
                             httpStatusCode = HttpStatusCode.Conflict;
                             break;
                         }
+                    case OperationStatus.SubjectNotFound:
+                        {
+                            message = $"Subject with id '{arg}' does not exist";
+                            httpStatusCode = HttpStatusCode.NotFound;
+                            break;
+                        }
                     case OperationStatus.ClassTypeNotFound:
                         {
                             message = $"Class type with name '{arg}' does not exist";
@@ -195,7 +206,13 @@ namespace OutOfTimePrototype.Utilities
                             break;
                         }
                 }
-                return new ClassOperationResult(status, httpStatusCode, errorMessage: message, queryResult: queryResult, modelState: modelState);
+                return new ClassOperationResult(status, 
+                    httpStatusCode, 
+                    errorMessage: message, 
+                    queryResult: queryResult, 
+                    modelState: modelState,
+                    operationResult: operationResult
+                    );
             }
         }
     }

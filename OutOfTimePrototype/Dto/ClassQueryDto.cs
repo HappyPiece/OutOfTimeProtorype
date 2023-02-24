@@ -10,6 +10,7 @@ namespace OutOfTimePrototype.Dto
         public int? TimeSlotNumber { get; set; }
         public string? ClusterNumber { get; set; }
         public Guid? EducatorId { get; set; }
+        public Guid? SubjectId { get; set; }
         public Guid? LectureHallId { get; set; }
         public string? ClassTypeName { get; set; }
         public DayOfWeek? DayOfWeek { get; set; }
