@@ -28,6 +28,11 @@ namespace OutOfTimePrototype.Services.General.Implementations
             _mapper = mapper;
         }
 
+        public async Task<List<User>> GetAllUsers()
+        {
+            return await _outOfTimeDbContext.Users.ToListAsync();
+        }
+
         public async Task<User?> GetUser(Guid id)
         {
             return await _outOfTimeDbContext.Users.FindAsync(id);

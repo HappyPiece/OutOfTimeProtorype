@@ -8,6 +8,7 @@ namespace OutOfTimePrototype.Services.General.Interfaces
 {
     public interface IUserService
     {
+        Task<List<User>> GetAllUsers();
         Task<User?> GetUser(Guid id);
         Task<UserOperationResult> EditUser(Guid id, UserDto userDto);
         Task<UserOperationResult> DeleteUser(Guid id);

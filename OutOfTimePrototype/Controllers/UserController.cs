@@ -41,6 +41,14 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
+    [MinRoleAuthorize(Role.Root)]
+    [Route("all")]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        return Ok(await _userService.GetAllUsers());
+    }
+
+    [HttpGet]
     [Authorize]
     [Route("self")]
     public async Task<IActionResult> GetSelf()
