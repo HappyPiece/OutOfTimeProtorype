@@ -9,9 +9,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OutOfTimePrototype.Config;
 using OutOfTimePrototype.Configurations;
-using OutOfTimePrototype.Dal.Models;
 using OutOfTimePrototype.DAL;
-using OutOfTimePrototype.Dto;
+using OutOfTimePrototype.Dal.Models;
+using OutOfTimePrototype.Middlewares.ExceptionMiddleware;
 using OutOfTimePrototype.Services.Authentication;
 using OutOfTimePrototype.Services.General.Implementations;
 using OutOfTimePrototype.Services.General.Interfaces;
@@ -124,6 +124,10 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+var logger = app.Services.GetRequiredService<ILogger<ExceptionMiddleware>>();
+app.ConfigureExceptionHandler(logger);
+app.ConfigureCustomExceptionMiddleware();
 
 app.MapControllers();
 
