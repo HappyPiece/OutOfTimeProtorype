@@ -32,6 +32,8 @@ namespace OutOfTimePrototype.DAL
             modelBuilder.Entity<ClassType>().HasKey(x => x.Name);
             modelBuilder.Entity<TimeSlot>().HasKey(x => x.Number);
             modelBuilder.Entity<Cluster>().HasKey(x => x.Number);
+
+            modelBuilder.Entity<CampusBuilding>().HasIndex(x => x.Address).IsUnique();
             
             modelBuilder.Entity<LectureHall>()
                 .HasOne(x => x.HostBuilding)
