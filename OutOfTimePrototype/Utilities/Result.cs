@@ -32,6 +32,11 @@ public class Result
     public bool IsSucceed => State == ResultState.Succeed && Error == null;
     public bool IsFailed => State == ResultState.Failed && Error != null;
 
+    public static implicit operator Result(Exception exception)
+    {
+        return new Result(exception);
+    }
+
     public static Result Fail(Exception e)
     {
         return new Result(e);

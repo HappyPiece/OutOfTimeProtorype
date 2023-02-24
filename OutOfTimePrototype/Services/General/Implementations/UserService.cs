@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.Dal.Models;
@@ -113,6 +115,23 @@ namespace OutOfTimePrototype.Services.General.Implementations
             await _outOfTimeDbContext.SaveChangesAsync();
 
             return GenerateDefaultOperationResult(OperationStatus.UserRegistered, user.Id.ToString());
+        }
+        
+        public async Task<Result> VerifyUserRole(List<Role> examinerRoles, Guid userToVerifyId, Role userRole)
+        {
+            if (!examinerRoles.Any(x => x.CanAssign(userRole)))
+                return new AccessNotAllowedException($"User with roles '{examinerRoles}' cannot perform this action");
+
+            var userToApprove = await GetUser(userToVerifyId);
+            if (userToApprove is null)
+                return new RecordNotFoundException($"User with id '{userToVerifyId.ToString()}' not found");
+            
+            userToApprove.VerifiedRoles.Add(userRole);
+            userToApprove.ClaimedRoles.Remove(userRole);
+            _outOfTimeDbContext.Users.Update(userToApprove);
+            await _outOfTimeDbContext.SaveChangesAsync();
+
+            return Result.Success();
         }
 
         public async Task<Result<List<Role>>> GetUnverifiedRoles(Guid id)
