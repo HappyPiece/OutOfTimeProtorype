@@ -39,17 +39,18 @@ namespace OutOfTimePrototype.Utilities
             }
 
             /// <summary>
-            /// 
+            /// Builder method to easily create different instances of <c>UserOperationResult</c> class
             /// </summary>
-            /// <param name="status"></param>
-            /// <param name="arg"></param>
+            /// <param name="status"><c>OperationStatus</c> representing state of operation with user</param>
+            /// <param name="arg">Argument to pass to the message</param>
             /// <param name="queryResult"></param>
-            /// <param name="user"></param>
-            /// <returns></returns>
+            /// <param name="user"><c>User</c> instance</param>
+            /// <returns><c>UserOperationResult</c> instance with different <c>message</c> and <c>httpStatusCode</c> depending on
+            /// arguments passed to the function</returns>
             public static UserOperationResult GenerateDefaultOperationResult(OperationStatus status, string? arg = null,
                 List<User>? queryResult = null, User? user = null)
             {
-                var message = "";
+                string message;
                 var httpStatusCode = HttpStatusCode.InternalServerError;
                 switch (status)
                 {
@@ -103,7 +104,8 @@ namespace OutOfTimePrototype.Utilities
                     user: user);
             }
 
-            public static IActionResult ToIActionResult(UserOperationResult userOperationResult) {
+            public static IActionResult ToIActionResult(UserOperationResult userOperationResult)
+            {
                 switch (userOperationResult.Status)
                 {
                     case OperationStatus.Success:
@@ -112,7 +114,8 @@ namespace OutOfTimePrototype.Utilities
                         return new OkResult();
                     case OperationStatus.UserRegistered:
                         if (userOperationResult.User is not null)
-                            return new CreatedResult($"api/users/{userOperationResult.User.Id}", userOperationResult.User);
+                            return new CreatedResult($"api/users/{userOperationResult.User.Id}",
+                                userOperationResult.User);
                         return new NoContentResult();
                     case OperationStatus.UserEdited:
                     case OperationStatus.UserDeleted:
@@ -141,7 +144,7 @@ namespace OutOfTimePrototype.Utilities
             {
                 { Role.Root, new List<Role> { Role.Admin, Role.ScheduleBureau, Role.Educator, Role.Student } },
                 { Role.Admin, new List<Role> { Role.ScheduleBureau, Role.Educator, Role.Student } },
-                { Role.ScheduleBureau, new List<Role> {Role.Educator, Role.Student} },
+                { Role.ScheduleBureau, new List<Role> { Role.Educator, Role.Student } },
                 { Role.Educator, new List<Role>() },
                 { Role.Student, new List<Role>() }
             };
@@ -153,11 +156,11 @@ namespace OutOfTimePrototype.Utilities
         public static bool IsHigherOrEqualPermissions(this Role role, Role otherRole)
         {
             if (role == otherRole) return true;
-            
+
             return RoleUtilities.RoleHierarchy
                 .TryGetValue(role, out var canAssign) && canAssign.Contains(otherRole);
         }
-        
+
         public static bool CanAssign(this Role role, Role otherRole)
         {
             return RoleUtilities.RoleHierarchy

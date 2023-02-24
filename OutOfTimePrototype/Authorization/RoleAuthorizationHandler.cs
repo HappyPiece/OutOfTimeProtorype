@@ -30,7 +30,7 @@ public class AuthorizeActionFilter : IAuthorizationFilter
 
         if (role == null)
         {
-            context.Result = new BadRequestResult();
+            context.Result = new BadRequestObjectResult("The user does not have any roles specified");
             return;
         }
 
@@ -38,15 +38,11 @@ public class AuthorizeActionFilter : IAuthorizationFilter
 
         if (!isSucceed)
         {
-            context.Result = new BadRequestResult();
+            context.Result = new BadRequestObjectResult("The user have invalid roles specified");
             return;
         }
 
-        if (_minRole.IsHigherOrEqualPermissions(enumRole))
-        {
-            context.Result = new AcceptedResult();
-            return;
-        }
+        if (_minRole.IsHigherOrEqualPermissions(enumRole)) return;
 
         context.Result = new ForbidResult();
     }

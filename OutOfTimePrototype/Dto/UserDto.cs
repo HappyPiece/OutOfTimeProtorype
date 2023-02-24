@@ -56,15 +56,30 @@ namespace OutOfTimePrototype.Dto
             ScheduleSelf = user.ScheduleSelf != null ? new EducatorDto(user.ScheduleSelf) : null;
         }
 
+        // Исходя из того, что написано внутри, этот метод выглядит бесполезно
         public ModelStateDictionary Validate()
         {
             var result = new ModelStateDictionary();
 
-            // General errors
+            // Не вижу смысла в подобных общих ошибках, так как их отлично обрабатывают аннотации
             if (!new EmailAddressAttribute().IsValid(Email))
             {
                 result.AddModelError("email", $"'{Email}' is not a valid Email address");
             }
+
+            // Я не нашёл кейса когда, нам нужна будет валидация в зависимости от типа аккаунта, так как все
+            // специфичные поля могут быть null 
+            // switch (AccountType)
+            // {
+            //     case AccountType.Student:
+            //         if (ClusterNumber is null)
+            //         {
+            //             result.AddModelError("clusterNumber", "field cannot be null");
+            //         }
+            //         
+            //         break;
+            //     case AccountType.Educator:
+            // }
 
             return result;
         }
