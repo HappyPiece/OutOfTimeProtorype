@@ -48,6 +48,7 @@ namespace OutOfTimePrototype.Utilities
                 UnspecifiedCluster,
                 UnspecifiedTimeSlot,
                 BadQuery,
+                AmbiguousDate,
                 QueryTooLarge
             }
 
@@ -202,6 +203,12 @@ namespace OutOfTimePrototype.Utilities
                     case OperationStatus.QueryTooLarge:
                         {
                             message = $"Query result is too large. Try splitting it up into smaller portions";
+                            httpStatusCode = HttpStatusCode.BadRequest;
+                            break;
+                        }
+                    case OperationStatus.AmbiguousDate:
+                        {
+                            message = $"Both specific date and day of the week were supplied, unable to resolve";
                             httpStatusCode = HttpStatusCode.BadRequest;
                             break;
                         }

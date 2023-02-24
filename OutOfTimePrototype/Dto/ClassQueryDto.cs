@@ -14,7 +14,7 @@ namespace OutOfTimePrototype.Dto
         public Guid? LectureHallId { get; set; }
         public string? ClassTypeName { get; set; }
         public DayOfWeek? DayOfWeek { get; set; }
-
+        public bool IgnoreClusterHierarchy { get; set; } = false;
         public ModelStateDictionary Validate()
         {
             throw new NotImplementedException();

@@ -9,7 +9,7 @@ namespace OutOfTimePrototype.Utilities
         {
             var result = new List<DateTime>();
             DateTime currentDate = startDate;
-            while (currentDate.DayOfWeek != dayOfWeek && currentDate <= endDate)
+            while (currentDate.DayOfWeek != (dayOfWeek ?? throw new ArgumentNullException()) && currentDate <= endDate)
             {
                 currentDate = currentDate.AddDays(1);
             }
@@ -25,7 +25,30 @@ namespace OutOfTimePrototype.Utilities
             DayOfWeek? day = dayOfWeek;
             return day.GetDayOfWeekFromBetweenDates(startDate, endDate);
         }
-        
+
+    }
+
+
+    public static class DateTimeExtensions
+    {
+        public static DateTime GetDayOfWeekFromThisWeek(this DateTime date, DayOfWeek targetDay)
+        {
+            DateTime? day = date;
+            return day.GetDayOfWeekFromThisWeek(targetDay);
+        }
+        public static DateTime GetDayOfWeekFromThisWeek(this DateTime? dayOfWeek, DayOfWeek targetDay)
+        {
+            DateTime currentDate = dayOfWeek ?? throw new ArgumentNullException();
+            while (currentDate.DayOfWeek != DayOfWeek.Monday)
+            {
+                currentDate = currentDate.AddDays(-1);
+            }
+            while (currentDate.DayOfWeek != targetDay)
+            {
+                currentDate = currentDate.AddDays(1);
+            }
+            return currentDate;
+        }  
     }
 
     public static class RoleExtensions

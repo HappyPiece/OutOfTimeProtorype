@@ -39,6 +39,15 @@ namespace OutOfTimePrototype.Controllers
             return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
         }
 
+        /// <summary>
+        /// Attempts to create a class for every day corresponding to the specified day of the week that is between supplied dates.
+        /// </summary>
+        /// <param name="classDto"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="dayOfWeek"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         [HttpPost, Route("create/on-day-of-week")]
         public async Task<IActionResult> CreateClasses(ClassDto classDto,
             [FromQuery] DateTime? startDate,
@@ -69,6 +78,9 @@ namespace OutOfTimePrototype.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <param name="classEditDto"></param>
+        /// If DayOfWeek property is supplied, the class is set to the respective day of the week that is on the same week as the original date.
+        /// Note that supplying both DayOfWeek and Date properties will result in an error.
+        /// Enabling Null mode doesn't affect this property behaviour: it won't change anything unless it's supplied.
         /// <param name="nullMode">
         /// When true, all the unspecified (null) parameters passed in DTO are to be set null to the actual class (thus such requests with unspecified Date, TimeSlot or Cluster properties will fail).
         /// When false, null parameters are ignored.
@@ -86,6 +98,23 @@ namespace OutOfTimePrototype.Controllers
             return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
         }
 
+        /// <summary>
+        /// Attempts to modify all the classes that are returned by supplied query.
+        /// </summary>
+        /// <param name="classEditDto"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="clusterNumber"></param>
+        /// <param name="educatorId"></param>
+        /// <param name="lectureHallId"></param>
+        /// <param name="timeSlotNumber"></param>
+        /// <param name="dayOfWeek"></param>
+        /// <param name="classType"></param>
+        /// <param name="nullMode">Works the same as when editing one class.</param>
+        /// <param name="ignoreClusterHierarchy">
+        /// When true, query won't select classes that are set for sub- or superclusters.
+        /// </param>
+        /// <returns></returns>
         [HttpPost, Route("edit")]
         public async Task<IActionResult> EditClasses(ClassEditDto classEditDto,
             [FromQuery] DateTime? startDate,
@@ -96,7 +125,8 @@ namespace OutOfTimePrototype.Controllers
             [FromQuery] int? timeSlotNumber,
             [FromQuery] DayOfWeek? dayOfWeek,
             [FromQuery] string? classType,
-            [FromQuery] bool nullMode = false
+            [FromQuery] bool nullMode = false,
+            [FromQuery] bool ignoreClusterHierarchy = false
             )
         {
             ClassQueryDto classQueryDto = new ClassQueryDto
@@ -108,7 +138,8 @@ namespace OutOfTimePrototype.Controllers
                 LectureHallId = lectureHallId,
                 DayOfWeek = dayOfWeek,
                 ClassTypeName = classType,
-                TimeSlotNumber = timeSlotNumber
+                TimeSlotNumber = timeSlotNumber,
+                IgnoreClusterHierarchy = ignoreClusterHierarchy
             };
 
             var result = await _classService.TryEditClasses(classQueryDto, classEditDto, nullMode);
@@ -135,6 +166,9 @@ namespace OutOfTimePrototype.Controllers
         /// <param name="dayOfWeek"></param>
         /// <param name="classType"></param>
         /// <param name="timeSlotNumber"></param>
+        /// <param name="ignoreClusterHierarchy">
+        /// When true, query won't select classes that are set for sub- or superclusters.
+        /// </param>
         /// <remarks>
         /// Sample request which will try to retrieve classes set from 20.02.2023 through to 26.02.2023 for cluster "1337":
         /// 
@@ -152,7 +186,8 @@ namespace OutOfTimePrototype.Controllers
             [FromQuery] Guid? lectureHallId,
             [FromQuery] DayOfWeek? dayOfWeek,
             [FromQuery] string? classType,
-            [FromQuery] int? timeSlotNumber
+            [FromQuery] int? timeSlotNumber,
+            [FromQuery] bool ignoreClusterHierarchy = false
             )
         {
             ClassQueryDto classQueryDto = new ClassQueryDto
@@ -164,7 +199,8 @@ namespace OutOfTimePrototype.Controllers
                 LectureHallId = lectureHallId,
                 DayOfWeek = dayOfWeek,
                 ClassTypeName = classType,
-                TimeSlotNumber = timeSlotNumber
+                TimeSlotNumber = timeSlotNumber,
+                IgnoreClusterHierarchy = ignoreClusterHierarchy
             };
 
             if (!ModelState.IsValid)
