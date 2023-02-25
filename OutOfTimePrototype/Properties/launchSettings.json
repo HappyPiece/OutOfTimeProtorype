@@ -16,6 +16,7 @@
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7292;http://localhost:5292",
       "environmentVariables": {
+        "DB_CONNECTION_STRING": "Server = localhost; Port = 5432; Database = OutOfTimeDb; User Id = postgres; Password = beebra228",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },

@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -58,7 +59,8 @@ builder.Services.AddSwaggerGen(options =>
 
 services.AddDbContext<OutOfTimeDbContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("OutOfTimeDb"));
+    //options.UseNpgsql(builder.Configuration.GetConnectionString("OutOfTimeDb"));
+    options.UseNpgsql(Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"));
 });
 
 builder.Services.AddAuthentication(options =>
@@ -99,7 +101,20 @@ services.AddScoped<IClassService, ClassService>();
 services.AddScoped<IClusterService, ClusterService>();
 services.AddScoped<IUserService, UserService>();
 
+services.AddHealthChecks();
+
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var outOfTimeDbContext = scope.ServiceProvider
+        .GetRequiredService<OutOfTimeDbContext>();
+    if (outOfTimeDbContext.Database.GetPendingMigrations().Any())
+    {
+        outOfTimeDbContext.Database.Migrate();
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -109,6 +124,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.MapHealthChecks("/health");
 
 app.UseAuthentication();
 app.UseAuthorization();
