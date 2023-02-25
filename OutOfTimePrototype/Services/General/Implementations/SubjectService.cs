@@ -2,8 +2,9 @@ using AutoMapper;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.DTO;
+using OutOfTimePrototype.Services.General.Interfaces;
 
-namespace OutOfTimePrototype.Services;
+namespace OutOfTimePrototype.Services.General.Implementations;
 
 public class SubjectService : ISubjectService
 {

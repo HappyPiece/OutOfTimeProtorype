@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using OutOfTimePrototype.Config;
 using OutOfTimePrototype.Configurations;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.Dal.Models;
@@ -15,7 +14,6 @@ using OutOfTimePrototype.Middlewares.ExceptionMiddleware;
 using OutOfTimePrototype.Services.Authentication;
 using OutOfTimePrototype.Services.General.Implementations;
 using OutOfTimePrototype.Services.General.Interfaces;
-using OutOfTimePrototype.Services.Implementations;
 using OutOfTimePrototype.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -106,6 +104,7 @@ services.AddSingleton(mapper);
 // Configure DI for Services
 services.AddTransient<ITokenService, TokenService>();
 services.AddScoped<ILectureHallService, LectureHallService>();
+services.AddScoped<ICampusBuildingService, CampusBuildingService>();
 services.AddScoped<IEducatorService, EducatorService>();
 services.AddScoped<IClassService, ClassService>();
 services.AddScoped<IClusterService, ClusterService>();

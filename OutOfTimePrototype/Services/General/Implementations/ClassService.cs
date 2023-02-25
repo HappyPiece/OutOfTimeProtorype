@@ -4,12 +4,11 @@ using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.Dto;
 using OutOfTimePrototype.DTO;
 using OutOfTimePrototype.Services.Interfaces;
-using System.Diagnostics.Metrics;
 using static OutOfTimePrototype.Utilities.ClassUtilities;
 using static OutOfTimePrototype.Utilities.ClassUtilities.ClassOperationResult;
 
 
-namespace OutOfTimePrototype.Services.Implementations
+namespace OutOfTimePrototype.Services.General.Implementations
 {
     public class ClassService : IClassService
     {

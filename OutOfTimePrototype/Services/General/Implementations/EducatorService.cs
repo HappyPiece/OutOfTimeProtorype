@@ -7,7 +7,7 @@ using OutOfTimePrototype.Exceptions;
 using OutOfTimePrototype.Services.Interfaces;
 using OutOfTimePrototype.Utilities;
 
-namespace OutOfTimePrototype.Services.Implementations;
+namespace OutOfTimePrototype.Services.General.Implementations;
 
 public class EducatorService : IEducatorService
 {
