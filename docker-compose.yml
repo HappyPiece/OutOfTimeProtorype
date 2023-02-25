@@ -2,9 +2,9 @@ version: '3.4'
 
 services:
   app:
-    image: outoftimeprototype:latest
-    # build: 
-    #   context: .
+    image: happypiece/outoftime:latest
+    build: 
+      context: .
     depends_on:
       - db
     ports:
