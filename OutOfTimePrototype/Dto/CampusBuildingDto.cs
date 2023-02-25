@@ -8,5 +8,5 @@ public class CampusBuildingDto
 
     public string? Name { get; set; }
 
-    public List<Guid>? LectureHallsIds { get; set; }
+    public List<Guid>? LectureHalls { get; set; }
 }
