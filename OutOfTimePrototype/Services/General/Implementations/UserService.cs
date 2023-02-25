@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-using AutoMapper;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.Dal.Models;
@@ -80,13 +78,14 @@ namespace OutOfTimePrototype.Services.General.Implementations
 
         public async Task<UserOperationResult> TryRegisterUser(UserDto userDto)
         {
-            if (await _outOfTimeDbContext.Users.AnyAsync(x => (x.Email == userDto.Email)))
+            if (await _outOfTimeDbContext.Users.AnyAsync(x => x.Email == userDto.Email))
             {
                 return GenerateDefaultOperationResult(OperationStatus.EmailAlreadyInUse, arg: userDto.Email);
             }
 
             User user;
 
+            // IMPORTANT: AccountType in current state looks like a useless thing, since it does not introduce any functionality, but only confuses and complicates the code 
             switch (userDto.AccountType)
             {
                 case AccountType.Student:
@@ -108,9 +107,13 @@ namespace OutOfTimePrototype.Services.General.Implementations
                 case AccountType.Educator:
                     user = User.Initialize.Educator(userDto);
                     break;
-                case AccountType.Default:
-                case AccountType.Admin:
                 case AccountType.ScheduleBureau:
+                    user = User.Initialize.ScheduleBureau(userDto);
+                    break;
+                case AccountType.Admin:
+                    user = User.Initialize.Admin(userDto);
+                    break;
+                case AccountType.Default:
                 default:
                     user = User.Initialize.Default(userDto);
                     break;
@@ -121,7 +124,7 @@ namespace OutOfTimePrototype.Services.General.Implementations
 
             return GenerateDefaultOperationResult(OperationStatus.UserRegistered, user.Id.ToString());
         }
-        
+
         public async Task<Result> VerifyUserRole(List<Role> examinerRoles, Guid userToVerifyId, Role userRole)
         {
             if (!examinerRoles.Any(x => x.CanAssign(userRole)))
@@ -130,7 +133,7 @@ namespace OutOfTimePrototype.Services.General.Implementations
             var userToApprove = await GetUser(userToVerifyId);
             if (userToApprove is null)
                 return new RecordNotFoundException($"User with id '{userToVerifyId.ToString()}' not found");
-            
+
             userToApprove.VerifiedRoles.Add(userRole);
             userToApprove.ClaimedRoles.Remove(userRole);
             _outOfTimeDbContext.Users.Update(userToApprove);
