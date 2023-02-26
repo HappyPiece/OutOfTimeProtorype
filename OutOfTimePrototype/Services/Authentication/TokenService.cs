@@ -10,7 +10,8 @@ namespace OutOfTimePrototype.Services.Authentication
     {
         public string GenerateAccessToken(IEnumerable<Claim> claims)
         {
-            var signingCredentials = new SigningCredentials(JwtConfiguration.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256);
+            var signingCredentials = new SigningCredentials(JwtConfiguration.GetSymmetricSecurityKey(),
+                SecurityAlgorithms.HmacSha256);
 
             var tokenOptions = new JwtSecurityToken(
                 issuer: JwtConfiguration.Issuer,
@@ -25,11 +26,9 @@ namespace OutOfTimePrototype.Services.Authentication
         public string GenerateRefreshToken()
         {
             var randomNumber = new byte[32];
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(randomNumber);
-                return Convert.ToBase64String(randomNumber);
-            }
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
         }
 
         public ClaimsPrincipal GetPrincipalFromToken(string token)
@@ -45,13 +44,15 @@ namespace OutOfTimePrototype.Services.Authentication
                 ValidateLifetime = false
             };
 
-            SecurityToken secutityToken;
-            var principal = (new JwtSecurityTokenHandler()).ValidateToken(token, tokenValidationParameters, out secutityToken);
-            var jwtSecurityToken = secutityToken as JwtSecurityToken;
-            if (jwtSecurityToken is null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            var principal =
+                new JwtSecurityTokenHandler().ValidateToken(token, tokenValidationParameters, out var securityToken);
+            if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
+                    StringComparison.InvariantCultureIgnoreCase))
             {
                 throw new SecurityTokenInvalidTypeException();
             }
+
             return principal;
         }
     }

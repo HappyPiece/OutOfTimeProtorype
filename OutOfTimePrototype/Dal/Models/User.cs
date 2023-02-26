@@ -1,8 +1,6 @@
-﻿using LanguageExt.Pipes;
-using OutOfTimePrototype.DAL.Models;
+﻿using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.Dto;
-using OutOfTimePrototype.DTO;
-using System.Diagnostics.Metrics;
+using OutOfTimePrototype.Utilities;
 
 namespace OutOfTimePrototype.Dal.Models
 {
@@ -46,7 +44,8 @@ namespace OutOfTimePrototype.Dal.Models
         {
             Id = userDto.Id;
             Email = userDto.Email;
-            Password = userDto.Password ?? throw new ArgumentNullException("Attempted to initialize User without a password");
+            Password = userDto.Password ??
+                       throw new ArgumentNullException("userDto", "Attempted to initialize User without a password");
             ClaimedRoles = userDto.ClaimedRoles;
             VerifiedRoles = userDto.VerifiedRoles;
             AccountType = userDto.AccountType;
@@ -62,9 +61,11 @@ namespace OutOfTimePrototype.Dal.Models
         {
             public static User Default(UserDto userDto)
             {
-                var newUser = new User();
-                newUser.Email = userDto.Email;
-                newUser.Password = userDto.Password;
+                var newUser = new User
+                {
+                    Email = userDto.Email,
+                    Password = HashingHelper.ComputeSha256Hash(userDto.Password)
+                };
 
                 return newUser;
             }
@@ -84,7 +85,7 @@ namespace OutOfTimePrototype.Dal.Models
             {
                 var newUser = Person(userDto);
 
-                newUser.VerifiedRoles = new List<Role>() { Role.Student };
+                newUser.VerifiedRoles = new List<Role> { Role.Student };
                 newUser.AccountType = AccountType.Student;
 
                 newUser.GradeBookNumber = userDto.GradeBookNumber;
@@ -96,9 +97,29 @@ namespace OutOfTimePrototype.Dal.Models
             public static User Educator(UserDto userDto, Cluster? cluster = null)
             {
                 var newUser = Person(userDto);
-             
-                newUser.ClaimedRoles = new List<Role>() { Role.Educator };
+
+                newUser.ClaimedRoles = new List<Role> { Role.Educator };
                 newUser.AccountType = AccountType.Educator;
+
+                return newUser;
+            }
+
+            public static User ScheduleBureau(UserDto userDto)
+            {
+                var newUser = Person(userDto);
+
+                newUser.ClaimedRoles = new List<Role> { Role.ScheduleBureau };
+                newUser.AccountType = AccountType.ScheduleBureau;
+
+                return newUser;
+            }
+            
+            public static User Admin(UserDto userDto)
+            {
+                var newUser = Person(userDto);
+                
+                newUser.ClaimedRoles = new List<Role> { Role.Admin };
+                newUser.AccountType = AccountType.Admin;
 
                 return newUser;
             }

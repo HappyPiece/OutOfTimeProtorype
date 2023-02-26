@@ -47,7 +47,7 @@ public class EducatorController : ControllerBase
         return NoContent();
     }
 
-    [HttpPut("edit/{id:guid}")]
+    [HttpPut("{id:guid}/edit")]
     public async Task<IActionResult> Edit(Guid id, [FromBody] EducatorDto educatorDto)
     {
         var result = await _educatorService.Edit(id, educatorDto);
@@ -57,7 +57,7 @@ public class EducatorController : ControllerBase
         );
     }
 
-    [HttpDelete("delete/{id:guid}")]
+    [HttpDelete("{id:guid}/delete")]
     public async Task<IActionResult> Delete(Guid id)
     {
         var result = await _educatorService.Delete(id);

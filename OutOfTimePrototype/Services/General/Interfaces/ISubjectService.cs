@@ -1,7 +1,7 @@
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.DTO;
 
-namespace OutOfTimePrototype.Services;
+namespace OutOfTimePrototype.Services.General.Interfaces;
 
 public interface ISubjectService
 {

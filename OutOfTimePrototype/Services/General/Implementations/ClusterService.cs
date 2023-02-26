@@ -2,9 +2,8 @@
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.Services.Interfaces;
-using System.Net;
 
-namespace OutOfTimePrototype.Services.Implementations
+namespace OutOfTimePrototype.Services.General.Implementations
 {
     public class ClusterService : IClusterService
     {

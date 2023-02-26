@@ -4,17 +4,17 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using OutOfTimePrototype.Config;
 using OutOfTimePrototype.Configurations;
-using OutOfTimePrototype.Dal.Models;
 using OutOfTimePrototype.DAL;
+using OutOfTimePrototype.Dal.Models;
+using OutOfTimePrototype.Middlewares.ExceptionMiddleware;
 using OutOfTimePrototype.Services.Authentication;
 using OutOfTimePrototype.Services.General.Implementations;
 using OutOfTimePrototype.Services.General.Interfaces;
-using OutOfTimePrototype.Services.Implementations;
 using OutOfTimePrototype.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,9 +28,19 @@ services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 });
 
+services.Configure<IdentityOptions>(opts =>
+{
+    opts.Password.RequireNonAlphanumeric = true;
+    opts.Password.RequireDigit = true;
+    opts.Password.RequiredLength = 6;
+    opts.Password.RequireLowercase = true;
+    opts.Password.RequireUppercase = true;
+    opts.Password.RequiredUniqueChars = 3;
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+services.AddEndpointsApiExplorer();
+services.AddSwaggerGen(options =>
 {
     var jwtSecurityScheme = new OpenApiSecurityScheme
     {
@@ -63,7 +73,7 @@ services.AddDbContext<OutOfTimeDbContext>(options =>
     options.UseNpgsql(Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"));
 });
 
-builder.Services.AddAuthentication(options =>
+services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -81,7 +91,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization(
+services.AddAuthorization(
     options =>
     {
         options.AddPolicy("RequireRoot", policy => policy.RequireRole(new List<string>() { Role.Root.ToString() }));
@@ -96,6 +106,7 @@ services.AddSingleton(mapper);
 // Configure DI for Services
 services.AddTransient<ITokenService, TokenService>();
 services.AddScoped<ILectureHallService, LectureHallService>();
+services.AddScoped<ICampusBuildingService, CampusBuildingService>();
 services.AddScoped<IEducatorService, EducatorService>();
 services.AddScoped<IClassService, ClassService>();
 services.AddScoped<IClusterService, ClusterService>();
@@ -128,6 +139,10 @@ app.MapHealthChecks("/health");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+var logger = app.Services.GetRequiredService<ILogger<ExceptionMiddleware>>();
+app.ConfigureExceptionHandler(logger);
+app.ConfigureCustomExceptionMiddleware();
 
 app.MapControllers();
 

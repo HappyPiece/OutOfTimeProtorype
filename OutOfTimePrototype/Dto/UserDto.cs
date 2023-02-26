@@ -11,8 +11,7 @@ namespace OutOfTimePrototype.Dto
     {
         public Guid Id { get; set; }
 
-        //[EmailAddress]
-        public string Email { get; set; }
+        [EmailAddress] public string Email { get; set; }
 
         public string? Password { get; set; }
 
@@ -54,22 +53,35 @@ namespace OutOfTimePrototype.Dto
             LastName = user.LastName;
             GradeBookNumber = user.GradeBookNumber;
             ClusterNumber = user.Cluster?.Number;
-            ScheduleSelf = (user.ScheduleSelf != null) ? new EducatorDto(user.ScheduleSelf) : null;
+            ScheduleSelf = user.ScheduleSelf != null ? new EducatorDto(user.ScheduleSelf) : null;
         }
 
+        // Исходя из того, что написано внутри, этот метод выглядит бесполезно
         public ModelStateDictionary Validate()
         {
             var result = new ModelStateDictionary();
-            if (!(new EmailAddressAttribute()).IsValid(Email))
-            {
-                result.AddModelError("email", $"'{Email}' is not a valid Email adress");
-            }     
-            return result;
-        }
 
-        public ModelStateDictionary Validate(AccountType accountType)
-        {
-            throw new NotImplementedException();
+            // Не вижу смысла в подобных общих ошибках, так как их отлично обрабатывают аннотации
+            if (!new EmailAddressAttribute().IsValid(Email))
+            {
+                result.AddModelError("email", $"'{Email}' is not a valid Email address");
+            }
+
+            // Я не нашёл кейса когда, нам нужна будет валидация в зависимости от типа аккаунта, так как все
+            // специфичные поля могут быть null 
+            // switch (AccountType)
+            // {
+            //     case AccountType.Student:
+            //         if (ClusterNumber is null)
+            //         {
+            //             result.AddModelError("clusterNumber", "field cannot be null");
+            //         }
+            //         
+            //         break;
+            //     case AccountType.Educator:
+            // }
+
+            return result;
         }
     }
 }
