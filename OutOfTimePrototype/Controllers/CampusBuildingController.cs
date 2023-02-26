@@ -1,7 +1,9 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using OutOfTimePrototype.DTO;
 using OutOfTimePrototype.Exceptions;
 using OutOfTimePrototype.Services;
+using OutOfTimePrototype.Services.General.Interfaces;
 
 namespace OutOfTimePrototype.Controllers;
 
@@ -29,8 +31,22 @@ public class CampusBuildingController : ControllerBase
     [HttpPost("create")]
     public async Task<IActionResult> Create([FromBody] CampusBuildingDto campusBuildingDto)
     {
-        await _campusBuildingService.Create(campusBuildingDto);
-        return NoContent();
+        var result = await _campusBuildingService.Create(campusBuildingDto);
+        
+        // TODO: make sure that all errors are returned in the ModelState format (now it's not)
+        return result.Match<IActionResult>(
+            NoContent,
+            e =>
+            {
+                return e switch
+                {
+                    ValidationException => BadRequest(e.Message),
+                    AlreadyExistsException => Conflict(e.Message),
+                    RecordNotFoundException => NotFound(e.Message),
+                    _ => StatusCode(500)
+                };
+            }
+        );
     }
 
     [HttpPut("edit/{id:guid}")]

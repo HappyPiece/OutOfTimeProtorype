@@ -7,7 +7,7 @@ using OutOfTimePrototype.Exceptions;
 using OutOfTimePrototype.Services.Interfaces;
 using OutOfTimePrototype.Utilities;
 
-namespace OutOfTimePrototype.Services.Implementations;
+namespace OutOfTimePrototype.Services.General.Implementations;
 
 public class LectureHallService : ILectureHallService
 {
@@ -47,6 +47,7 @@ public class LectureHallService : ILectureHallService
             return Result.Fail(e);
         }
 
+
         var entity = _mapper.Map<LectureHall>(hallDto);
         _outOfTimeDbContext.LectureHalls.Add(entity);
         await _outOfTimeDbContext.SaveChangesAsync();
@@ -59,9 +60,15 @@ public class LectureHallService : ILectureHallService
         var dbEntity = await _outOfTimeDbContext.LectureHalls.FindAsync(id);
 
         if (dbEntity is null)
+            return new RecordNotFoundException($"Lecture hall with id: '{id}' does not exists");
+
+        if (hallUpdateModel.HostBuildingId != null)
         {
-            var e = new RecordNotFoundException($"Lecture hall with id: '{id}' do not exists");
-            return Result.Fail(e);
+            var isNewCampusBuildingExists =
+                await _outOfTimeDbContext.CampusBuildings.AnyAsync(hall => hall.Id == hallUpdateModel.HostBuildingId);
+            if (!isNewCampusBuildingExists)
+                return new RecordNotFoundException(
+                    $"Campus building with id: '{hallUpdateModel.HostBuildingId}' does not exists");
         }
 
         var updatedEntity = _mapper.Map(hallUpdateModel, dbEntity);

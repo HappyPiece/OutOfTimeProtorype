@@ -5,14 +5,13 @@ using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.Dto;
 using OutOfTimePrototype.DTO;
 using OutOfTimePrototype.Services.Interfaces;
-using System.Diagnostics.Metrics;
-using OutOfTimePrototype.Utilities;
 using static OutOfTimePrototype.Utilities.ClassUtilities;
 using static OutOfTimePrototype.Utilities.ClassUtilities.ClassOperationResult;
 using LanguageExt.ClassInstances;
 using OutOfTimePrototype.Dal.Models;
+using OutOfTimePrototype.Utilities;
 
-namespace OutOfTimePrototype.Services.Implementations
+namespace OutOfTimePrototype.Services.General.Implementations
 {
     public class ClassService : IClassService
     {

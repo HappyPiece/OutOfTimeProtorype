@@ -5,9 +5,10 @@ using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.DTO;
 using OutOfTimePrototype.Exceptions;
+using OutOfTimePrototype.Services.General.Interfaces;
 using OutOfTimePrototype.Utilities;
 
-namespace OutOfTimePrototype.Services;
+namespace OutOfTimePrototype.Services.General.Implementations;
 
 public class CampusBuildingService : ICampusBuildingService
 {
@@ -28,10 +29,14 @@ public class CampusBuildingService : ICampusBuildingService
     public async Task<Result> Create(CampusBuildingDto campusBuildingDto)
     {
         if (string.IsNullOrEmpty(campusBuildingDto.Address))
-            return Result.Fail(new ValidationException("Address of campus building must be present"));
+            return new ValidationException("Address of campus building must be present");
 
         if (await IsExistsByAddress(campusBuildingDto.Address))
-            return Result.Fail(new AlreadyExistsException("Campus building with this address already exists"));
+            return new AlreadyExistsException(
+                $"Campus building with {campusBuildingDto.Address} address already exists");
+        if (campusBuildingDto.LectureHalls != null &&
+            !await _outOfTimeDbContext.LectureHalls.AllAsync(hall => campusBuildingDto.LectureHalls.Contains(hall.Id)))
+            return new RecordNotFoundException("Not all present lecture halls actually exists");
 
         var entity = _mapper.Map<CampusBuilding>(campusBuildingDto);
         _outOfTimeDbContext.CampusBuildings.Add(entity);
@@ -64,7 +69,7 @@ public class CampusBuildingService : ICampusBuildingService
     {
         if (await _outOfTimeDbContext.CampusBuildings.AnyAsync(b => b.Id == id))
             return Result.Fail(new RecordNotFoundException($"Campus building with id '{id}' not found"));
-        
+
         var entityToRemove = new Educator { Id = id };
         _outOfTimeDbContext.Educators.Remove(entityToRemove);
         await _outOfTimeDbContext.SaveChangesAsync();

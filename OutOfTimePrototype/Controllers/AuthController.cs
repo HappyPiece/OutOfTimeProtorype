@@ -1,15 +1,11 @@
-﻿using LanguageExt.Pipes;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using OutOfTimePrototype.Dal.Models;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.Dto;
 using OutOfTimePrototype.Services.Authentication;
 using OutOfTimePrototype.Services.General.Interfaces;
-using System.Security.Claims;
-using System.Text.Json;
 using static OutOfTimePrototype.Utilities.UserUtilities.UserOperationResult;
 
 namespace OutOfTimePrototype.Controllers
@@ -72,7 +68,7 @@ namespace OutOfTimePrototype.Controllers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email)
+                new Claim(ClaimTypes.Email, user.Email),
             };
 
             foreach (var role in user.VerifiedRoles)

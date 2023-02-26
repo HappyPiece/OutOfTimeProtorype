@@ -4,6 +4,7 @@
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; }
+        public Guid HostBuildingId { get; set; }
         public CampusBuilding HostBuilding { get; set; }
         public int Capacity { get; set; }
     }
