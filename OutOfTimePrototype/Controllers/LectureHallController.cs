@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
+using OutOfTimePrototype.Authorization;
+using OutOfTimePrototype.Dal.Models;
 using OutOfTimePrototype.DTO;
 using OutOfTimePrototype.Exceptions;
 using OutOfTimePrototype.Services.Interfaces;
 
 namespace OutOfTimePrototype.Controllers;
 
-[Route("api/lecture_hall")]
+[Route("api/lecture-hall")]
 [ApiController]
 public class LectureHallController : ControllerBase
 {
@@ -22,7 +24,8 @@ public class LectureHallController : ControllerBase
     /// <param name="timeSlotNumber">The number of the class by time</param>
     /// <param name="date">The day on which free lectures are obtained</param>
     /// <remarks>This is a method for the bureau of schedules</remarks>
-    [HttpGet("free_halls")]
+    [MinRoleAuthorize(Role.ScheduleBureau)]
+    [HttpGet("free-halls")]
     public async Task<IActionResult> GetFreeHalls([FromQuery] int timeSlotNumber, [FromQuery] DateTime date)
     {
         var result = new
@@ -42,6 +45,7 @@ public class LectureHallController : ControllerBase
         return Ok(result);
     }
 
+    [MinRoleAuthorize(Role.Admin)]
     [HttpPost("create")]
     public async Task<IActionResult> CreateHall(LectureHallDto lectureHallDto)
     {
@@ -54,6 +58,7 @@ public class LectureHallController : ControllerBase
         );
     }
 
+    [MinRoleAuthorize(Role.Admin)]
     [HttpPut("update")]
     public async Task<IActionResult> EditHall([FromQuery] Guid id, LectureHallUpdateDto hallUpdateDto)
     {

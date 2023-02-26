@@ -11,6 +11,8 @@ using System.Collections.Specialized;
 using System.Security.Claims;
 using OutOfTimePrototype.Dto;
 using OutOfTimePrototype.Services.Interfaces;
+using OutOfTimePrototype.Authorization;
+using OutOfTimePrototype.Dal.Models;
 
 namespace OutOfTimePrototype.Controllers
 {
@@ -27,6 +29,7 @@ namespace OutOfTimePrototype.Controllers
             _outOfTimeDbContext = outOfTimeDbContext;
         }
 
+        [MinRoleAuthorize(Role.ScheduleBureau)]
         [HttpPost, Route("create")]
         public async Task<IActionResult> CreateClass(ClassDto ClassDto)
         {
@@ -48,6 +51,7 @@ namespace OutOfTimePrototype.Controllers
         /// <param name="dayOfWeek"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
+        [MinRoleAuthorize(Role.ScheduleBureau)]
         [HttpPost, Route("create/on-day-of-week")]
         public async Task<IActionResult> CreateClasses(ClassDto classDto,
             [FromQuery] DateTime? startDate,
@@ -86,6 +90,7 @@ namespace OutOfTimePrototype.Controllers
         /// When false, null parameters are ignored.
         /// </param>
         /// <returns></returns>
+        [MinRoleAuthorize(Role.ScheduleBureau)]
         [HttpPost, Route("{id}/edit")]
         public async Task<IActionResult> EditClass(Guid id, ClassEditDto classEditDto, [FromQuery] bool nullMode = false)
         {
@@ -115,6 +120,7 @@ namespace OutOfTimePrototype.Controllers
         /// When true, query won't select classes that are set for sub- or superclusters.
         /// </param>
         /// <returns></returns>
+        [MinRoleAuthorize(Role.ScheduleBureau)]
         [HttpPost, Route("edit")]
         public async Task<IActionResult> EditClasses(ClassEditDto classEditDto,
             [FromQuery] DateTime? startDate,
@@ -146,10 +152,42 @@ namespace OutOfTimePrototype.Controllers
             return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
         }
 
-        [HttpDelete, Route("{id}/delete")]
+        [MinRoleAuthorize(Role.ScheduleBureau)]
+        [HttpDelete, Route("{id}")]
         public async Task<IActionResult> DeleteClass([FromRoute] Guid id)
         {
             var result = await _classService.TryDeleteClass(id);
+
+            return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
+        }
+
+        [MinRoleAuthorize(Role.ScheduleBureau)]
+        [HttpDelete, Route("{id}")]
+        public async Task<IActionResult> DeleteClasses(
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] string? clusterNumber,
+            [FromQuery] Guid? educatorId,
+            [FromQuery] Guid? lectureHallId,
+            [FromQuery] int? timeSlotNumber,
+            [FromQuery] DayOfWeek? dayOfWeek,
+            [FromQuery] string? classType,
+            [FromQuery] bool nullMode = false,
+            [FromQuery] bool ignoreClusterHierarchy = false)
+        {
+            ClassQueryDto classQueryDto = new ClassQueryDto
+            {
+                StartDate = startDate,
+                EndDate = endDate,
+                ClusterNumber = clusterNumber,
+                EducatorId = educatorId,
+                LectureHallId = lectureHallId,
+                DayOfWeek = dayOfWeek,
+                ClassTypeName = classType,
+                TimeSlotNumber = timeSlotNumber,
+                IgnoreClusterHierarchy = ignoreClusterHierarchy
+            };
+            var result = await _classService.TryDeleteClasses(classQueryDto);
 
             return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
         }
@@ -229,7 +267,7 @@ namespace OutOfTimePrototype.Controllers
             }));
         }
 
-        [HttpGet, Route("{id}/get")]
+        [HttpGet, Route("{id}")]
         public async Task<IActionResult> GetClass([FromRoute] Guid id)
         {
             Class? @class = await _outOfTimeDbContext.Classes
