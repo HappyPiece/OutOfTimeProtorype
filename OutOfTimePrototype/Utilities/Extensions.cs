@@ -53,16 +53,18 @@ namespace OutOfTimePrototype.Utilities
 
     public static class RoleExtensions
     {
-        public static bool CanAssign(this Role role, Role assignRole)
+        public static bool IsHigherOrEqualPermissions(this Role role, Role otherRole)
         {
-            if (RoleUtilities.AssignHierarchy.TryGetValue(role, out var canAssign))
-            {
-                if (canAssign.Contains(assignRole))
-                {
-                    return true;
-                }
-            }
-            return false;
+            if (role == otherRole) return true;
+
+            return RoleUtilities.RoleHierarchy
+                .TryGetValue(role, out var canAssign) && canAssign.Contains(otherRole);
+        }
+
+        public static bool CanAssign(this Role role, Role otherRole)
+        {
+            return RoleUtilities.RoleHierarchy
+                .TryGetValue(role, out var roles) && roles.Contains(otherRole);
         }
     }
 }

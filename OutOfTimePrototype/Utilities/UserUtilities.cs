@@ -150,21 +150,4 @@ namespace OutOfTimePrototype.Utilities
             };
         }
     }
-
-    public static class RoleExtensions
-    {
-        public static bool IsHigherOrEqualPermissions(this Role role, Role otherRole)
-        {
-            if (role == otherRole) return true;
-
-            return RoleUtilities.RoleHierarchy
-                .TryGetValue(role, out var canAssign) && canAssign.Contains(otherRole);
-        }
-
-        public static bool CanAssign(this Role role, Role otherRole)
-        {
-            return RoleUtilities.RoleHierarchy
-                .TryGetValue(role, out var roles) && roles.Contains(otherRole);
-        }
-    }
 }
