@@ -167,13 +167,13 @@ namespace OutOfTimePrototype.Services.Implementations
             return GenerateDefaultOperationResult(OperationStatus.ClassesDeleted, queryResult.QueryResult.Count.ToString());
         }
 
-        public async Task<ClassOperationResult> TryCreateClass(ClassDto classDto)
+        public async Task<ClassOperationResult> TryCreateClass(CreateClassDto classDto)
         {
             classDto.Format();
             return await TryCreateClass(classDto, false);
         }
 
-        private async Task<ClassOperationResult> TryCreateClass(ClassDto classDto, bool isTransactionUnit = false)
+        private async Task<ClassOperationResult> TryCreateClass(CreateClassDto classDto, bool isTransactionUnit = false)
         {
             var initializationResult = await TryInitializeClass(classDto);
             if (initializationResult.Status is not OperationStatus.Success)
@@ -198,7 +198,7 @@ namespace OutOfTimePrototype.Services.Implementations
             return GenerateDefaultOperationResult(status: OperationStatus.ClassCreated, arg: newClass.Id.ToString());
         }
 
-        public async Task<ClassOperationResult> TryCreateClasses(ClassQueryDto classQueryDto, ClassDto classDto)
+        public async Task<ClassOperationResult> TryCreateClasses(ClassQueryDto classQueryDto, CreateClassDto classDto)
         {
             classDto.Format();
 
@@ -383,7 +383,7 @@ namespace OutOfTimePrototype.Services.Implementations
             return GenerateDefaultOperationResult(OperationStatus.ClassesEdited, queryResult.QueryResult.Count.ToString());
         }
 
-        private async Task<ClassOperationResult> TryInitializeClass(ClassDto classDto)
+        private async Task<ClassOperationResult> TryInitializeClass(CreateClassDto classDto)
         {
             TimeSlot? timeSlot = await GetTimeSlotIfExists(classDto.TimeSlotNumber);
             if (timeSlot is null)

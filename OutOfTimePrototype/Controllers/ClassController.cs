@@ -11,6 +11,9 @@ using System.Collections.Specialized;
 using System.Security.Claims;
 using OutOfTimePrototype.Dto;
 using OutOfTimePrototype.Services.Interfaces;
+using OutOfTimePrototype.Authorization;
+using OutOfTimePrototype.Dal.Models;
+using LanguageExt.ClassInstances;
 
 namespace OutOfTimePrototype.Controllers
 {
@@ -28,14 +31,14 @@ namespace OutOfTimePrototype.Controllers
         }
 
         [HttpPost, Route("create")]
-        public async Task<IActionResult> CreateClass(ClassDto ClassDto)
+        public async Task<IActionResult> CreateClass(CreateClassDto createClassDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var result = await _classService.TryCreateClass(ClassDto);
+            var result = await _classService.TryCreateClass(createClassDto);
             return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
         }
 
@@ -49,7 +52,7 @@ namespace OutOfTimePrototype.Controllers
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         [HttpPost, Route("create/on-day-of-week")]
-        public async Task<IActionResult> CreateClasses(ClassDto classDto,
+        public async Task<IActionResult> CreateClasses(CreateClassDto createClassDto,
             [FromQuery] DateTime? startDate,
             [FromQuery] DateTime? endDate,
             [FromQuery] DayOfWeek? dayOfWeek
@@ -62,7 +65,7 @@ namespace OutOfTimePrototype.Controllers
                 DayOfWeek = dayOfWeek
             };
 
-            var result = await _classService.TryCreateClasses(classQueryDto, classDto);
+            var result = await _classService.TryCreateClasses(classQueryDto, createClassDto);
 
             if (result.Status is OperationStatus.BadQuery)
             {
@@ -154,6 +157,37 @@ namespace OutOfTimePrototype.Controllers
             return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
         }
 
+        [MinRoleAuthorize(Role.ScheduleBureau)]
+        [HttpDelete, Route("")]
+        public async Task<IActionResult> DeleteClasses(
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] string? clusterNumber,
+            [FromQuery] Guid? educatorId,
+            [FromQuery] Guid? lectureHallId,
+            [FromQuery] int? timeSlotNumber,
+            [FromQuery] DayOfWeek? dayOfWeek,
+            [FromQuery] string? classType,
+            [FromQuery] bool nullMode = false,
+            [FromQuery] bool ignoreClusterHierarchy = false)
+        {
+            ClassQueryDto classQueryDto = new ClassQueryDto
+            {
+                StartDate = startDate,
+                EndDate = endDate,
+                ClusterNumber = clusterNumber,
+                EducatorId = educatorId,
+                LectureHallId = lectureHallId,
+                DayOfWeek = dayOfWeek,
+                ClassTypeName = classType,
+                TimeSlotNumber = timeSlotNumber,
+                IgnoreClusterHierarchy = ignoreClusterHierarchy
+            };
+            var result = await _classService.TryDeleteClasses(classQueryDto);
+
+            return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
+        }
+
         /// <summary>
         /// Used to retrieve classes that meet the specified requirements.
         /// Returns a collection of classes that match ALL the individual properties that have been supplied.
@@ -217,16 +251,7 @@ namespace OutOfTimePrototype.Controllers
 
             if (result.QueryResult is null) throw new ArgumentNullException("Expected not null query result");
 
-            return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.QueryResult.Select(x => new ClassDto
-            {
-                Id = x.Id,
-                Date = x.Date,
-                TimeSlotNumber = x.TimeSlot.Number,
-                ClusterNumber = x.Cluster.Number,
-                EducatorId = x.Educator?.Id,
-                LectureHallId = x.LectureHall?.Id,
-                ClassTypeName = x.Type?.Name
-            }));
+            return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.QueryResult.Select(x => new ClassDto(x)));
         }
 
         [HttpGet, Route("{id}/get")]
@@ -245,16 +270,7 @@ namespace OutOfTimePrototype.Controllers
                 return NotFound();
             }
 
-            var result = new ClassDto
-            {
-                Id= @class.Id,
-                Date = @class.Date,
-                TimeSlotNumber = @class.TimeSlot.Number,
-                ClusterNumber = @class.Cluster.Number,
-                EducatorId = @class.Educator?.Id,
-                LectureHallId = @class.LectureHall?.Id,
-                ClassTypeName = @class.Type?.Name
-            };
+            var result = new ClassDto(@class);
 
             return Ok(result);
         }
