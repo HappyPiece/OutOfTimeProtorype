@@ -89,9 +89,7 @@ public class UserController : ControllerBase
                 return BadRequest("User roles is not specified in token");
 
             // ...check if he can do it
-            var canAccess = roles.Any(r => r.IsHigherOrEqualPermissions(Role.Admin));
-
-            if (!canAccess)
+            if (!roles.Any(r => r.IsHigherOrEqual(Role.Admin)))
                 return Forbid();
         }
 

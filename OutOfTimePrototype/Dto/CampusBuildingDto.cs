@@ -1,3 +1,5 @@
+using OutOfTimePrototype.DAL.Models;
+
 namespace OutOfTimePrototype.DTO;
 
 public class CampusBuildingDto
@@ -9,4 +11,16 @@ public class CampusBuildingDto
     public string? Name { get; set; }
 
     public List<Guid>? LectureHalls { get; set; }
+
+    public CampusBuildingDto()
+    {
+
+    }
+
+    public CampusBuildingDto(CampusBuilding campusBuilding)
+    {
+        Id = campusBuilding.Id;
+        Address = campusBuilding.Address;
+        Name = campusBuilding.Name;
+    }
 }
