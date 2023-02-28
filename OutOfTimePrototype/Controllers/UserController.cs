@@ -45,7 +45,7 @@ public class UserController : ControllerBase
     [Route("all")]
     public async Task<IActionResult> GetAllUsers()
     {
-        return Ok(await _userService.GetAllUsers());
+        return Ok((await _userService.GetAllUsers()).Select(x => new UserDto(x)));
     }
 
     [HttpGet]
@@ -68,7 +68,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetUser([FromRoute] Guid id)
     {
         var user = await _userService.GetUser(id);
-        return user is null ? NotFound() : Ok(user);
+        return user is null ? NotFound() : Ok(new UserDto(user));
     }
 
     [HttpPut]
