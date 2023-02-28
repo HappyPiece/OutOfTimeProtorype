@@ -12,7 +12,9 @@ USER 1000
 ENV ENVIRONMENT=Development
 ENV ASPNETCORE_URLS=http://+:5000
 ENV ASPNETCORE_HTTP_PORT=https://+:5001
+ENV ROOT_EMAIL=root@root.net
+ENV ROOT_PASS=aboba
 
 EXPOSE 5000
 
-ENTRYPOINT ["dotnet", "OutOfTimePrototype.dll", "--environment=Development"]
+ENTRYPOINT ROOT_EMAIL=${ROOT_EMAIL} ROOT_EMAIL=${ROOT_EMAIL} dotnet OutOfTimePrototype.dll --environment=Development

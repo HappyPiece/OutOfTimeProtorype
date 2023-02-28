@@ -10,6 +10,8 @@ services:
     ports:
       - "0.0.0.0:5000:5000"
     environment:
+      ROOT_EMAIL: "root@root.net"
+      ROOT_PASS: "aboba"
       DB_CONNECTION_STRING: "host=database_host; port=5432; database=outoftime; username=outoftime; password=outoftime"
       ASPNETCORE_HTTP_PORT: https://+:5001 
       ASPNETCORE_URLS: http://+:5000

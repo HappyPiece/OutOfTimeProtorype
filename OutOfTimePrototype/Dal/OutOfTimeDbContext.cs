@@ -1,4 +1,5 @@
 ﻿using LanguageExt;
+using LanguageExt.Pretty;
 using Microsoft.EntityFrameworkCore;
 using OutOfTimePrototype.Dal.Models;
 using OutOfTimePrototype.DAL.Models;
@@ -27,6 +28,12 @@ namespace OutOfTimePrototype.DAL
 
         public OutOfTimeDbContext(DbContextOptions options) : base(options) { }
 
+        /*
+        DB_CONNECTION_STRING="Server = localhost; Port = 5432; Database = OutOfTimeDb; User Id = postgres; Password = beebra228" \
+        ROOT_EMAIL=root@root.net \
+        ROOT_PASS=aboba \
+        dotnet ef database update
+        */
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         { 
             modelBuilder.Entity<ClassType>().HasKey(x => x.Name);
@@ -42,7 +49,11 @@ namespace OutOfTimePrototype.DAL
             //modelBuilder.Entity<Class>().HasOne(x => new { x.TimeSlot, x.Cluster });
 
             //Data seeding
-            modelBuilder.Entity<Cluster>().HasData( new Cluster { Number = "9721"} );
+            modelBuilder.Entity<User>().HasData( new User { 
+                Email = Environment.GetEnvironmentVariable("ROOT_EMAIL"),
+                Password = Environment.GetEnvironmentVariable("ROOT_PASS"),
+                VerifiedRoles = new List<Role> { Role.Root }
+            });
 
             modelBuilder.Entity<Educator>().HasData(
                 new Educator { FirstName = "Educator", MiddleName = "Educatorovich", LastName = "Educatorov"},
