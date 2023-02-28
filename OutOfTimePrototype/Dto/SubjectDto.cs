@@ -1,3 +1,5 @@
+using OutOfTimePrototype.DAL.Models;
+
 namespace OutOfTimePrototype.DTO;
 
 /// <summary>
@@ -7,4 +9,15 @@ public class SubjectDto
 {
     public Guid? Id { get; set; }
     public string Name { get; set; }
+
+    public SubjectDto()
+    {
+
+    }
+
+    public SubjectDto (Subject subject)
+    {
+        Id = subject.Id;
+        Name = subject.Name;
+    }
 }
