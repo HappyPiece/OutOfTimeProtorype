@@ -44,7 +44,7 @@ namespace OutOfTimePrototype.Dto
         {
             Id = user.Id;
             Email = user.Email;
-            Password = user.Password;
+            //Password = user.Password;
             AccountType = user.AccountType;
             ClaimedRoles = user.ClaimedRoles;
             VerifiedRoles = user.VerifiedRoles;
