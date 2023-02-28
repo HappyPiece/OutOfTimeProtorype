@@ -6,6 +6,7 @@ using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.Dto;
 using OutOfTimePrototype.Services.Authentication;
 using OutOfTimePrototype.Services.General.Interfaces;
+using OutOfTimePrototype.Utilities;
 using static OutOfTimePrototype.Utilities.UserUtilities.UserOperationResult;
 
 namespace OutOfTimePrototype.Controllers
@@ -18,7 +19,8 @@ namespace OutOfTimePrototype.Controllers
         private readonly ITokenService _tokenService;
         private readonly IUserService _userService;
 
-        public AuthController(OutOfTimeDbContext outOfTimeDbContext, ITokenService tokenService, IUserService userService)
+        public AuthController(OutOfTimeDbContext outOfTimeDbContext, ITokenService tokenService,
+            IUserService userService)
         {
             _tokenService = tokenService;
             _outOfTimeDbContext = outOfTimeDbContext;
@@ -32,7 +34,7 @@ namespace OutOfTimePrototype.Controllers
             {
                 return BadRequest(ModelState);
             }
-           
+
             if (!userDto.Validate().IsValid)
             {
                 return BadRequest(new ValidationProblemDetails(userDto.Validate()));
@@ -59,12 +61,30 @@ namespace OutOfTimePrototype.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = await _outOfTimeDbContext.Users.FirstOrDefaultAsync(x => (x.Email == loginDto.Email) && (x.Password == loginDto.Password));
+            var user = await _outOfTimeDbContext.Users.FirstOrDefaultAsync(x => x.Email == loginDto.Email);
+
             if (user is null)
             {
                 return BadRequest("Invalid credentials");
             }
 
+            var hashedPassword = HashingHelper.ComputeSha256Hash(loginDto.Password);
+            
+            // TODO: maybe string.equals() will be better
+            if (user.Password != hashedPassword && user.Password != loginDto.Password)
+            {
+                BadRequest("Invalid credentials");
+            }
+            else if (user.Password == loginDto.Password)
+            {
+                // If user has unhashed password then update the password in DB to hashed one
+                var updatedPasswordUser = new UserDto
+                {
+                    Password = HashingHelper.ComputeSha256Hash(user.Password)
+                };
+                await _userService.EditUser(user.Id, updatedPasswordUser);
+            }
+            
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Id.ToString()),
@@ -100,11 +120,15 @@ namespace OutOfTimePrototype.Controllers
                 return BadRequest(ModelState);
             }
 
-            var principal = _tokenService.GetPrincipalFromToken(refreshDTO.AccessToken ?? throw new ArgumentNullException("Access token not supplied"));
+            var principal = _tokenService.GetPrincipalFromToken(refreshDTO.AccessToken ??
+                                                                throw new ArgumentNullException(
+                                                                    "Access token not supplied"));
 
-            var user = await _outOfTimeDbContext.Users.FirstOrDefaultAsync(x => x.Id.ToString() == principal.Identity.Name);
+            var user = await _outOfTimeDbContext.Users.FirstOrDefaultAsync(x =>
+                x.Id.ToString() == principal.Identity.Name);
 
-            if (user is null || user.RefreshToken != refreshDTO.RefreshToken || user.RefreshTokenExpiryTime < DateTime.UtcNow)
+            if (user is null || user.RefreshToken != refreshDTO.RefreshToken ||
+                user.RefreshTokenExpiryTime < DateTime.UtcNow)
             {
                 return BadRequest();
             }
