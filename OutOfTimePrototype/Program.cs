@@ -15,6 +15,7 @@ using OutOfTimePrototype.Services.Authentication;
 using OutOfTimePrototype.Services.General.Implementations;
 using OutOfTimePrototype.Services.General.Interfaces;
 using OutOfTimePrototype.Services.Interfaces;
+using OutOfTimePrototype.DTO;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -61,6 +62,7 @@ services.AddSwaggerGen(options =>
     {
         { jwtSecurityScheme, new List<string>() }
     });
+    options.DocumentFilter<CustomModelDocumentFilter<ClassDto>>();
 
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
