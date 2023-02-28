@@ -76,6 +76,7 @@ namespace OutOfTimePrototype.Services.General.Implementations
             return GenerateDefaultOperationResult(OperationStatus.UserDeleted, id.ToString());
         }
 
+        // TODO: put auth logic outside of UserService
         public async Task<UserOperationResult> TryRegisterUser(UserDto userDto)
         {
             if (await _outOfTimeDbContext.Users.AnyAsync(x => x.Email == userDto.Email))
@@ -84,8 +85,7 @@ namespace OutOfTimePrototype.Services.General.Implementations
             }
 
             User user;
-
-            // IMPORTANT: AccountType in current state looks like a useless thing, since it does not introduce any functionality, but only confuses and complicates the code 
+            
             switch (userDto.AccountType)
             {
                 case AccountType.Student:
