@@ -2,6 +2,7 @@ version: '3.4'
 
 services:
   app:
+    container_name: outoftime-app
     image: happypiece/outoftime:latest
     build: 
       context: .
@@ -18,6 +19,7 @@ services:
       - app-network
 
   db:
+    container_name: outoftime-db
     hostname: database_host
     image: postgres:latest
     expose:

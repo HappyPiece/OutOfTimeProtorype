@@ -1,0 +1,6 @@
+winpty docker exec -it outoftime-db bash
+
+docker cp ./sql outoftime-db:/root
+psql -U outoftime -f /root/sql/RootAdditionScript.sql -v ROOT_EMAIL=root@root.net -v ROOT_PASS=aboba
+
+docker cp ./sql outoftime-db:/root
