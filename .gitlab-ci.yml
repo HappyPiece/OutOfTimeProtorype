@@ -16,7 +16,7 @@ build-image:
     - docker:23.0.1-dind
   before_script:
     - docker info
-    - docker login -u $DOCKER_USER -p $DOCKERHUB_PASS
+    - docker login -u $DOCKER_USER -p $DOCKER_PASS
   script:
     - echo 'Building docker image...'
     - docker build -t $IMAGE_NAME:$IMAGE_TAG .
@@ -29,7 +29,7 @@ deploy:
   stage: deploy
   before_script:
     - docker info
-    - docker login -u $DOCKER_USER -p $DOCKERHUB_PASS
+    - docker login -u $DOCKER_USER -p $DOCKER_PASS
   script:
     - echo 'Deploying project...'
     - docker pull $IMAGE_NAME:$IMAGE_TAG
