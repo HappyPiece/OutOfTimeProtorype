@@ -4,3 +4,49 @@ docker cp ./sql outoftime-db:/root
 psql -U outoftime -f /root/sql/RootAdditionScript.sql -v ROOT_EMAIL=root@root.net -v ROOT_PASS=aboba
 
 docker cp ./sql outoftime-db:/root
+
+docker exec -it outoftime-db \
+    psql -U outoftime -f /root/sql/RootAdditionScript.sql -v ROOT_EMAIL=root@root.net -v ROOT_PASS=aboba
+
+
+
+stages:
+  - build
+  - deploy
+  - pages
+
+variables:
+  IMAGE_NAME: happypiece/outoftime
+  IMAGE_TAG: latest
+
+build-image:
+  tags:
+    - build
+    - docker
+  stage: build
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  before_script:
+    - docker info
+    - docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+  script:
+    - echo 'Building docker image...'
+    - docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+    - docker push ${IMAGE_NAME}:${IMAGE_TAG}
+    - echo 'Build completed, cleaning things up'
+
+deploy:
+  tags:
+    - deploy
+  stage: deploy
+  before_script:
+    - docker info
+    - docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+  script:
+    - echo 'Deploying project...'
+    - docker compose up -d
+    - docker cp ./sql outoftime-db:/root
+    - "docker exec -it outoftime-db psql -U outoftime -f /root/sql/RootAdditionScript.sql -v ROOT_EMAIL=root@root.net -v ROOT_PASS=aboba"
+    - echo 'Deploy completed. Running in' $(docker container ls -q)
+    

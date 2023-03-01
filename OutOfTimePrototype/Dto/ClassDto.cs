@@ -57,7 +57,7 @@ namespace OutOfTimePrototype.DTO
         }
     }
 
-    public class CreateClassDto : Utilities.IFormattable
+    public class ClassCreateDto : Utilities.IFormattable
     {
         public Guid? Id { get; set; }
 
