@@ -11,9 +11,9 @@ build-image:
     - build
     - docker
   stage: build
-  image: docker:20.10.16
+  image: docker:23.0.1
   services:
-    - docker:20.10.16-dind
+    - docker:23.0.1-dind
   before_script:
     - docker info
     - docker login -u $DOCKER_USER -p $DOCKERHUB_PASS
