@@ -36,7 +36,7 @@ deploy:
   script:
     - echo 'Deploying project...'
     - docker pull $IMAGE_NAME:$IMAGE_TAG
-    - docker compose up -d
+    - docker-compose up -d
     - docker cp ./sql outoftime-db:/root
     - docker exec -it outoftime-db psql -U outoftime -f /root/sql/RootAdditionScript.sql -v ROOT_EMAIL=$ROOT_EMAIL -v ROOT_PASS=$ROOT_PASS
     - echo 'Deploy completed'
