@@ -11,6 +11,7 @@ build-image:
     - build
     - docker
   stage: build
+  when: manual
   image: docker:23.0.1
   services:
     - docker:23.0.1-dind
@@ -27,6 +28,8 @@ deploy:
   tags:
     - deploy
   stage: deploy
+  needs:
+    - build-image
   before_script:
     - docker info
     - docker login -u $DOCKER_USER -p $DOCKER_PASS
