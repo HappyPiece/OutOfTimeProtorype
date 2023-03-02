@@ -28,8 +28,7 @@ deploy:
   tags:
     - deploy
   stage: deploy
-  needs:
-    - build-image
+  when: manual
   before_script:
     - docker info
     - docker login -u $DOCKER_USER -p $DOCKER_PASS
