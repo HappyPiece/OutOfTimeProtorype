@@ -35,7 +35,7 @@ deploy:
   script:
     - echo 'Deploying project...'
     - docker pull $IMAGE_NAME:$IMAGE_TAG
-    - docker container ls --filter name="outoftime*" -q | xargs docker stop | xargs docker container rm
+    - docker container ls --filter name="outoftime*" -q | xargs docker stop | xargs docker container rm || true
     - docker-compose up -d
     - docker cp ./sql outoftime-db:/root
     - docker exec outoftime-db bash -c \
