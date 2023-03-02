@@ -39,5 +39,7 @@ deploy:
     - docker container ls --filter name="outoftime*" -q | xargs docker stop | xargs docker container rm
     - docker-compose up -d
     - docker cp ./sql outoftime-db:/root
-    - docker exec -it outoftime-db psql -U outoftime -f /root/sql/RootAdditionScript.sql -v ROOT_EMAIL=$ROOT_EMAIL -v ROOT_PASS=$ROOT_PASS
+    - docker exec -it outoftime-db bash -c \
+      "export ROOT_EMAIL=$(echo $ROOT_EMAIL) && export ROOT_PASS=$(echo $ROOT_PASS) && 
+      psql -U outoftime -f /root/sql/RootAdditionScript.sql -v ROOT_EMAIL=$ROOT_EMAIL -v ROOT_PASS=$ROOT_PASS" 
     - echo 'Deploy completed'
