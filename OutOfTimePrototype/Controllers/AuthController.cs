@@ -70,12 +70,12 @@ namespace OutOfTimePrototype.Controllers
 
             var hashedPassword = HashingHelper.ComputeSha256Hash(loginDto.Password);
             
-            // TODO: maybe string.equals() will be better
-            if (user.Password != hashedPassword && user.Password != loginDto.Password)
+            if (!(user.Password == hashedPassword || user.Password == loginDto.Password))
             {
-                BadRequest("Invalid credentials");
+                return BadRequest("Invalid credentials");
             }
-            else if (user.Password == loginDto.Password)
+
+            if (user.Password == loginDto.Password)
             {
                 // If user has unhashed password then update the password in DB to hashed one
                 var updatedPasswordUser = new UserDto
@@ -84,7 +84,7 @@ namespace OutOfTimePrototype.Controllers
                 };
                 await _userService.EditUser(user.Id, updatedPasswordUser);
             }
-            
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Id.ToString()),

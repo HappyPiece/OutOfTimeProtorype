@@ -26,24 +26,21 @@ public class AuthorizeActionFilter : IAuthorizationFilter
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
-        var role = context.HttpContext.User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Role)?.Value;
-
-        if (role == null)
+        var roles = context.HttpContext.User.Claims.Where(claim => claim.Type == ClaimTypes.Role).Select(claim => claim.Value).ToList();
+        
+        foreach (var role in roles)
         {
-            context.Result = new BadRequestObjectResult("The user does not have any roles specified");
-            return;
+            var isSucceed = Enum.TryParse(role, out Role enumRole);
+
+            if (!isSucceed)
+            {
+                context.Result = new BadRequestObjectResult("The user have invalid roles specified");
+                return;
+            }
+
+            if (_minRole.IsHigherOrEqualPermissions(enumRole)) return;  
         }
-
-        var isSucceed = Enum.TryParse(role, out Role enumRole);
-
-        if (!isSucceed)
-        {
-            context.Result = new BadRequestObjectResult("The user have invalid roles specified");
-            return;
-        }
-
-        if (_minRole.IsHigherOrEqualPermissions(enumRole)) return;
-
+        
         context.Result = new ForbidResult();
     }
 }

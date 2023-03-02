@@ -162,7 +162,7 @@ namespace OutOfTimePrototype.Controllers
         }
 
         [MinRoleAuthorize(Role.ScheduleBureau)]
-        [HttpDelete, Route("{id}")]
+        [HttpDelete]
         public async Task<IActionResult> DeleteClasses(
             [FromQuery] DateTime? startDate,
             [FromQuery] DateTime? endDate,
