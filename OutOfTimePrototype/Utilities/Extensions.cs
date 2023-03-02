@@ -53,7 +53,7 @@ namespace OutOfTimePrototype.Utilities
 
     public static class RoleExtensions
     {
-        public static bool IsHigherOrEqualPermissions(this Role role, Role otherRole)
+        public static bool IsHigherOrEqual(this Role role, Role otherRole)
         {
             if (role == otherRole) return true;
 

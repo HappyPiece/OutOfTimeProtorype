@@ -31,14 +31,14 @@ namespace OutOfTimePrototype.Controllers
 
         [MinRoleAuthorize(Role.ScheduleBureau)]
         [HttpPost, Route("create")]
-        public async Task<IActionResult> CreateClass(ClassDto ClassDto)
+        public async Task<IActionResult> CreateClass(ClassCreateDto ClassCreateDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var result = await _classService.TryCreateClass(ClassDto);
+            var result = await _classService.TryCreateClass(ClassCreateDto);
             return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
         }
 
@@ -53,7 +53,7 @@ namespace OutOfTimePrototype.Controllers
         /// <exception cref="ArgumentNullException"></exception>
         [MinRoleAuthorize(Role.ScheduleBureau)]
         [HttpPost, Route("create/on-day-of-week")]
-        public async Task<IActionResult> CreateClasses(ClassDto classDto,
+        public async Task<IActionResult> CreateClasses(ClassCreateDto ClassCreateDto,
             [FromQuery] DateTime? startDate,
             [FromQuery] DateTime? endDate,
             [FromQuery] DayOfWeek? dayOfWeek
@@ -66,7 +66,7 @@ namespace OutOfTimePrototype.Controllers
                 DayOfWeek = dayOfWeek
             };
 
-            var result = await _classService.TryCreateClasses(classQueryDto, classDto);
+            var result = await _classService.TryCreateClasses(classQueryDto, ClassCreateDto);
 
             if (result.Status is OperationStatus.BadQuery)
             {
@@ -162,7 +162,7 @@ namespace OutOfTimePrototype.Controllers
         }
 
         [MinRoleAuthorize(Role.ScheduleBureau)]
-        [HttpDelete]
+        [HttpDelete, Route("")]
         public async Task<IActionResult> DeleteClasses(
             [FromQuery] DateTime? startDate,
             [FromQuery] DateTime? endDate,
@@ -255,16 +255,7 @@ namespace OutOfTimePrototype.Controllers
 
             if (result.QueryResult is null) throw new ArgumentNullException("Expected not null query result");
 
-            return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.QueryResult.Select(x => new ClassDto
-            {
-                Id = x.Id,
-                Date = x.Date,
-                TimeSlotNumber = x.TimeSlot.Number,
-                ClusterNumber = x.Cluster.Number,
-                EducatorId = x.Educator?.Id,
-                LectureHallId = x.LectureHall?.Id,
-                ClassTypeName = x.Type?.Name
-            }));
+            return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.QueryResult.Select(x => new ClassDto(x)));
         }
 
         [HttpGet, Route("{id}")]
@@ -283,18 +274,23 @@ namespace OutOfTimePrototype.Controllers
                 return NotFound();
             }
 
-            var result = new ClassDto
-            {
-                Id= @class.Id,
-                Date = @class.Date,
-                TimeSlotNumber = @class.TimeSlot.Number,
-                ClusterNumber = @class.Cluster.Number,
-                EducatorId = @class.Educator?.Id,
-                LectureHallId = @class.LectureHall?.Id,
-                ClassTypeName = @class.Type?.Name
-            };
+            var result = new ClassDto(@class);
 
             return Ok(result);
+        }
+
+        [HttpGet, Route("slots")]
+        public async Task<IActionResult> GetTimeSlots()
+        {
+            List<TimeSlot> slots = await _outOfTimeDbContext.TimeSlots.OrderBy(x => x.Number).ToListAsync(); 
+            return Ok(slots);
+        }
+
+        [HttpGet, Route("types")]
+        public async Task<IActionResult> GetClassTypes()
+        {
+            List<ClassType> types = await _outOfTimeDbContext.ClassTypes.ToListAsync();
+            return Ok(types);
         }
     }
 }
