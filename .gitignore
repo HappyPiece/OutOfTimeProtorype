@@ -26,6 +26,7 @@ bin/
 obj/
 TestResults/
 .vs/
+sql/cmds.txt
 ###################
 # Web publish log #
 ###################
