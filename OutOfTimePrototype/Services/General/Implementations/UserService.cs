@@ -44,15 +44,19 @@ namespace OutOfTimePrototype.Services.General.Implementations
             {
                 return GenerateDefaultOperationResult(OperationStatus.NotFound, arg: id.ToString());
             }
-
-            if (await _outOfTimeDbContext.Users.AnyAsync(user => user.Email == userDto.Email))
+            
+            if (userDto.Email != null && await _outOfTimeDbContext.Users.AnyAsync(user => user.Email == userDto.Email))
             {
                 return GenerateDefaultOperationResult(OperationStatus.EmailAlreadyInUse, userDto.Email);
             }
 
-            if (!await _outOfTimeDbContext.Clusters.AnyAsync(cluster => cluster.Number == userDto.ClusterNumber))
+            if (userDto.ClusterNumber != null && dbUser.ClaimedRoles.Contains(Role.Student))
             {
-                return GenerateDefaultOperationResult(OperationStatus.ClusterNotFound, userDto.ClusterNumber);
+                if (!await _outOfTimeDbContext.Clusters.AnyAsync(cluster =>
+                        cluster.Number == userDto.ClusterNumber))
+                {
+                    return GenerateDefaultOperationResult(OperationStatus.ClusterNotFound, userDto.ClusterNumber);
+                }
             }
 
             var updatedUser = _mapper.Map(userDto, dbUser);
@@ -85,7 +89,7 @@ namespace OutOfTimePrototype.Services.General.Implementations
             }
 
             User user;
-            
+
             switch (userDto.AccountType)
             {
                 case AccountType.Student:
