@@ -28,18 +28,17 @@ deploy:
   tags:
     - deploy
   stage: deploy
-  needs:
-    - build-image
+  when: manual
   before_script:
     - docker info
     - docker login -u $DOCKER_USER -p $DOCKER_PASS
   script:
     - echo 'Deploying project...'
     - docker pull $IMAGE_NAME:$IMAGE_TAG
-    - docker container ls --filter name="outoftime*" -q | xargs docker stop | xargs docker container rm
+    - docker container ls --filter name="outoftime*" -q | xargs docker stop | xargs docker container rm || true
     - docker-compose up -d
     - docker cp ./sql outoftime-db:/root
-    - docker exec -it outoftime-db bash -c \
+    - docker exec outoftime-db bash -c \
       "export ROOT_EMAIL=$(echo $ROOT_EMAIL) && export ROOT_PASS=$(echo $ROOT_PASS) && 
       psql -U outoftime -f /root/sql/RootAdditionScript.sql -v ROOT_EMAIL=$ROOT_EMAIL -v ROOT_PASS=$ROOT_PASS" 
     - echo 'Deploy completed'
