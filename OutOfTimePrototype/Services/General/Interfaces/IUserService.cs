@@ -11,6 +11,7 @@ namespace OutOfTimePrototype.Services.General.Interfaces
         Task<List<User>> GetAllUsers();
         Task<User?> GetUser(Guid id);
         Task<UserOperationResult> EditUser(Guid id, UserDto userDto);
+        Task<UserOperationResult> EditUserPassword(Guid id, string password);
         Task<UserOperationResult> DeleteUser(Guid id);
         Task<UserOperationResult> TryRegisterUser(UserDto userDto);
         Task<Result<List<Role>>> GetUnverifiedRoles(Guid id);
