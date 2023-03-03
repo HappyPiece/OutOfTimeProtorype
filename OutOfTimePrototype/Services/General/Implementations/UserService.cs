@@ -52,8 +52,8 @@ namespace OutOfTimePrototype.Services.General.Implementations
 
             if (userDto.ClusterNumber != null && dbUser.ClaimedRoles.Contains(Role.Student))
             {
-                if (!await _outOfTimeDbContext.Clusters.AnyAsync(cluster =>
-                        cluster.Number == userDto.ClusterNumber))
+                var cluster = await _clusterService.TryGetCluster(userDto.ClusterNumber);
+                if (cluster is null)
                 {
                     return GenerateDefaultOperationResult(OperationStatus.ClusterNotFound, userDto.ClusterNumber);
                 }
@@ -61,6 +61,21 @@ namespace OutOfTimePrototype.Services.General.Implementations
 
             var updatedUser = _mapper.Map(userDto, dbUser);
             _outOfTimeDbContext.Users.Update(updatedUser);
+            await _outOfTimeDbContext.SaveChangesAsync();
+
+            return GenerateDefaultOperationResult(OperationStatus.UserEdited, id.ToString());
+        }
+
+        public async Task<UserOperationResult> EditUserPassword(Guid id, string password)
+        {
+            var dbUser = await _outOfTimeDbContext.Users.FindAsync(id);
+
+            if (dbUser is null)
+            {
+                return GenerateDefaultOperationResult(OperationStatus.NotFound, arg: id.ToString());
+            }
+
+            dbUser.Password = password;
             await _outOfTimeDbContext.SaveChangesAsync();
 
             return GenerateDefaultOperationResult(OperationStatus.UserEdited, id.ToString());

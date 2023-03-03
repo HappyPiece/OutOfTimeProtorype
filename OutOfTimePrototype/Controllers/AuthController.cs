@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using LanguageExt.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -78,11 +79,11 @@ namespace OutOfTimePrototype.Controllers
             if (user.Password == loginDto.Password)
             {
                 // If user has unhashed password then update the password in DB to hashed one
-                var updatedPasswordUser = new UserDto
+                var result = await _userService.EditUserPassword(user.Id, HashingHelper.ComputeSha256Hash(user.Password));
+                if (result.Status != OperationStatus.UserEdited)
                 {
-                    Password = HashingHelper.ComputeSha256Hash(user.Password)
-                };
-                await _userService.EditUser(user.Id, updatedPasswordUser);
+                    throw new Exception("User password update failed");
+                }
             }
 
             var claims = new List<Claim>
