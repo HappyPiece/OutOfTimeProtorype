@@ -17,6 +17,7 @@ using OutOfTimePrototype.Services.General.Implementations;
 using OutOfTimePrototype.Services.General.Interfaces;
 using OutOfTimePrototype.Services.Interfaces;
 using OutOfTimePrototype.DTO;
+using OutOfTimePrototype.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -145,6 +146,8 @@ app.UseAuthorization();
 var logger = app.Services.GetRequiredService<ILogger<ExceptionMiddleware>>();
 app.ConfigureExceptionHandler(logger);
 app.ConfigureCustomExceptionMiddleware();
+
+app.AddEgorMiddleware();
 
 app.MapControllers();
 
