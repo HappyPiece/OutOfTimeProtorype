@@ -18,7 +18,7 @@
 
     public static class EgorMiddlewareExtensions
     {
-        public static IApplicationBuilder AddEgorMiddleware(this IApplicationBuilder applicationBuilder)
+        public static IApplicationBuilder UseEgorMiddleware(this IApplicationBuilder applicationBuilder)
         {
             return applicationBuilder.UseMiddleware<EgorMiddleware>();
         }

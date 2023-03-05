@@ -131,7 +131,7 @@ var logger = app.Services.GetRequiredService<ILogger<ExceptionMiddleware>>();
 app.ConfigureExceptionHandler(logger);
 app.ConfigureCustomExceptionMiddleware();
 
-app.AddEgorMiddleware();
+app.UseEgorMiddleware();
 
 app.MapControllers();
 
