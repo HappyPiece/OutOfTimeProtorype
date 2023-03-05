@@ -25,8 +25,6 @@ namespace OutOfTimePrototype.DTO
 
         public LectureHallDto? LectureHall { get; set; }
 
-        public CampusBuildingDto? CampusBuilding { get; set; }
-
         public EducatorDto? Educator { get; set; }
 
         public SubjectDto? Subject { get; set; }
@@ -51,7 +49,7 @@ namespace OutOfTimePrototype.DTO
             ClusterNumber = @class.Cluster.Number;
             Educator = @class.Educator is not null ? new EducatorDto(@class.Educator) : null;
             LectureHall = @class.LectureHall is not null ? new LectureHallDto(@class.LectureHall) : null;
-            CampusBuilding = @class.LectureHall is not null && @class.LectureHall.HostBuilding is not null ? new CampusBuildingDto(@class.LectureHall.HostBuilding) : null;
+            //CampusBuilding = @class.LectureHall is not null && @class.LectureHall.HostBuilding is not null ? new CampusBuildingDto(@class.LectureHall.HostBuilding) : null;
             Subject = @class.Subject is not null ? new SubjectDto(@class.Subject) : null;
             ClassTypeName = @class.Type?.Name;
         }

@@ -29,9 +29,8 @@ public class LectureHallController : ControllerBase
     [HttpGet("free-halls")]
     public async Task<IActionResult> GetFreeHalls([FromQuery] int timeSlotNumber, [FromQuery] DateTime date)
     {
-        var result = new
-            { unoccupiedHalls = await _lectureHallService.GetAllUnoccupied(timeSlotNumber, date) };
-        return Ok(result);
+        var result = await _lectureHallService.GetAllUnoccupied(timeSlotNumber, date);
+        return Ok(result.Select(x => new LectureHallDto(x)));
     }
 
     /// <summary>
@@ -39,16 +38,23 @@ public class LectureHallController : ControllerBase
     /// </summary>
     /// <param name="buildingId">Guid of the building</param>
     /// <remarks>This is a method for casual users</remarks>
-    [HttpGet]
+    [HttpGet, Route("by-host")]
     public async Task<IActionResult> GetHallsByBuildingId([FromQuery] Guid buildingId)
     {
         var result = await _lectureHallService.GetByBuilding(buildingId);
-        return Ok(result);
+        return Ok(result.Select(x => new LectureHallDto(x)));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetHalls()
+    {
+        var result = await _lectureHallService.GetAll();
+        return Ok(result.Select(x => new LectureHallDto(x)));
     }
 
     [Authorize] [MinRoleAuthorize(Role.Admin)]
     [HttpPost("create")]
-    public async Task<IActionResult> CreateHall(LectureHallDto lectureHallDto)
+    public async Task<IActionResult> CreateHall(LectureHallCreateDto lectureHallDto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
