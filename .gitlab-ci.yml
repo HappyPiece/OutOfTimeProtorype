@@ -11,7 +11,11 @@ build-image:
     - build
     - docker
   stage: build
-  when: manual
+  #when: manual
+  rules:
+    - changes:
+        - Dockerfile
+        - OutOfTimePrototype/**/*
   image: docker:23.0.1
   services:
     - docker:23.0.1-dind
@@ -28,7 +32,6 @@ deploy:
   tags:
     - deploy
   stage: deploy
-  when: manual
   before_script:
     - docker info
     - docker login -u $DOCKER_USER -p $DOCKER_PASS
