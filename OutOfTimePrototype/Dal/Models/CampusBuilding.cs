@@ -8,6 +8,6 @@
 
         public string Name { get; set; }
 
-        public List<LectureHall> LectureHalls { get; set; }
+        public List<LectureHall> LectureHalls { get; set; } = new List<LectureHall>();
     }
 }

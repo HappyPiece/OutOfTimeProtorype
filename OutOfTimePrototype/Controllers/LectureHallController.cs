@@ -48,7 +48,7 @@ public class LectureHallController : ControllerBase
 
     [Authorize] [MinRoleAuthorize(Role.Admin)]
     [HttpPost("create")]
-    public async Task<IActionResult> CreateHall(LectureHallDto lectureHallDto)
+    public async Task<IActionResult> CreateHall(LectureHallCreateDto lectureHallDto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 

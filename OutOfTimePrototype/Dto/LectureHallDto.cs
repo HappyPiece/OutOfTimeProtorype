@@ -7,7 +7,7 @@ public class LectureHallDto
 {
     public Guid? Id { get; set; }
     [Required] public string Name { get; set; }
-    [Required] public Guid HostBuildingId { get; set; }
+    [Required] public CampusBuildingDto HostBuilding { get; set; }
     [Required] public int Capacity { get; set; }
 
     public LectureHallDto()
@@ -19,9 +19,16 @@ public class LectureHallDto
     {
         Id = lectureHall.Id;
         Name = lectureHall.Name;
-        HostBuildingId = lectureHall.HostBuildingId;
+        HostBuilding = new CampusBuildingDto(lectureHall.HostBuilding);
         Capacity = lectureHall.Capacity;
     }
+}
+
+public class LectureHallCreateDto
+{
+    [Required] public string Name { get; set; }
+    [Required] public Guid HostBuildingId { get; set; }
+    [Required] public int Capacity { get; set; }
 }
 
 public class LectureHallUpdateDto

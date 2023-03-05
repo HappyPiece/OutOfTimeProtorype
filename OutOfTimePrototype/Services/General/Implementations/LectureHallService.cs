@@ -38,47 +38,71 @@ public class LectureHallService : ILectureHallService
             .ToListAsync();
     }
 
-    public async Task<Result> CreateLectureHall(LectureHallDto hallDto)
+    public async Task<Result> CreateLectureHall(LectureHallCreateDto hallDto)
     {
-        if (await IsLectureHallExists(hallDto.Name, hallDto.HostBuildingId))
+        var host = await _outOfTimeDbContext.CampusBuildings.FirstOrDefaultAsync(x => x.Id == hallDto.HostBuildingId);
+        if (host is null)
         {
-            var e = new AlreadyExistsException(
-                $"Lecture hall with name: '{hallDto.Name}' and building id: '{hallDto.HostBuildingId}' already exists");
+            var e = new RecordNotFoundException(
+                $"Building with Id '{hallDto.HostBuildingId}' does not exist");
             return Result.Fail(e);
         }
 
+        if (await SameHallExists(hallDto.Name, hallDto.HostBuildingId))
+        {
+            var e = new AlreadyExistsException(
+                $"Lecture hall with name: '{hallDto.Name}' already exists in building '{hallDto.HostBuildingId}'");
+            return Result.Fail(e);
+        }
 
-        var entity = _mapper.Map<LectureHall>(hallDto);
+        var entity = new LectureHall
+        {
+            HostBuildingId = hallDto.HostBuildingId,
+            Name = hallDto.Name,
+            Capacity = hallDto.Capacity,
+            HostBuilding = host
+        };
         _outOfTimeDbContext.LectureHalls.Add(entity);
         await _outOfTimeDbContext.SaveChangesAsync();
 
         return Result.Success();
     }
 
-    public async Task<Result> EditLectureHall(Guid id, LectureHallUpdateDto hallUpdateModel)
+    public async Task<Result> EditLectureHall(Guid id, LectureHallUpdateDto hallUpdateDto)
     {
         var dbEntity = await _outOfTimeDbContext.LectureHalls.FindAsync(id);
 
         if (dbEntity is null)
             return new RecordNotFoundException($"Lecture hall with id: '{id}' does not exists");
 
-        if (hallUpdateModel.HostBuildingId != null)
+        CampusBuilding? newHost = null;
+        if (hallUpdateDto.HostBuildingId != null)
         {
-            var isNewCampusBuildingExists =
-                await _outOfTimeDbContext.CampusBuildings.AnyAsync(hall => hall.Id == hallUpdateModel.HostBuildingId);
-            if (!isNewCampusBuildingExists)
+            newHost = await _outOfTimeDbContext.CampusBuildings.FirstOrDefaultAsync(x => x.Id == hallUpdateDto.HostBuildingId);
+            if (newHost is null)
                 return new RecordNotFoundException(
-                    $"Campus building with id: '{hallUpdateModel.HostBuildingId}' does not exists");
+                    $"Campus building with id: '{hallUpdateDto.HostBuildingId}' does not exists");
+            if (await SameHallExists(hallUpdateDto.Name ?? dbEntity.Name, hallUpdateDto.HostBuildingId ?? throw new ArgumentNullException()))
+            {
+                var e = new AlreadyExistsException(
+                    $"Lecture hall with name: '{hallUpdateDto.Name}' already exists in building '{hallUpdateDto.HostBuildingId}'");
+                return Result.Fail(e);
+            }
         }
 
-        var updatedEntity = _mapper.Map(hallUpdateModel, dbEntity);
-        _outOfTimeDbContext.LectureHalls.Add(updatedEntity);
+        {
+            dbEntity.Capacity = hallUpdateDto.Capacity ?? dbEntity.Capacity;
+            dbEntity.Name = hallUpdateDto.Name ?? dbEntity.Name;
+            dbEntity.HostBuildingId = hallUpdateDto.HostBuildingId ?? dbEntity.HostBuildingId;
+            dbEntity.HostBuilding = newHost ?? dbEntity.HostBuilding;
+        }
+
         await _outOfTimeDbContext.SaveChangesAsync();
 
         return Result.Success();
     }
 
-    private async Task<bool> IsLectureHallExists(string name, Guid hostBuildingId)
+    private async Task<bool> SameHallExists(string name, Guid hostBuildingId)
     {
         return await _outOfTimeDbContext.LectureHalls.AnyAsync(hall =>
             hall.Name == name && hall.HostBuilding.Id == hostBuildingId);

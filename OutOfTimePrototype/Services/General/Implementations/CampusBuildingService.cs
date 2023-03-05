@@ -26,7 +26,7 @@ public class CampusBuildingService : ICampusBuildingService
         return await _outOfTimeDbContext.CampusBuildings.ToListAsync();
     }
 
-    public async Task<Result> Create(CampusBuildingDto campusBuildingDto)
+    public async Task<Result> Create(CampusBuildingCreateDto campusBuildingDto)
     {
         if (string.IsNullOrEmpty(campusBuildingDto.Address))
             return new ValidationException("Address of campus building must be present");
@@ -34,9 +34,6 @@ public class CampusBuildingService : ICampusBuildingService
         if (await IsExistsByAddress(campusBuildingDto.Address))
             return new AlreadyExistsException(
                 $"Campus building with {campusBuildingDto.Address} address already exists");
-        if (campusBuildingDto.LectureHalls != null &&
-            !await _outOfTimeDbContext.LectureHalls.AllAsync(hall => campusBuildingDto.LectureHalls.Contains(hall.Id)))
-            return new RecordNotFoundException("Not all present lecture halls actually exists");
 
         var entity = _mapper.Map<CampusBuilding>(campusBuildingDto);
         _outOfTimeDbContext.CampusBuildings.Add(entity);
@@ -45,7 +42,7 @@ public class CampusBuildingService : ICampusBuildingService
         return Result.Success();
     }
 
-    public async Task<Result> Edit(Guid id, CampusBuildingDto campusBuildingDto)
+    public async Task<Result> Edit(Guid id, CampusBuildingEditDto campusBuildingDto)
     {
         var dbEntity = await _outOfTimeDbContext.CampusBuildings.FindAsync(id);
 
@@ -67,11 +64,11 @@ public class CampusBuildingService : ICampusBuildingService
 
     public async Task<Result> Delete(Guid id)
     {
-        if (await _outOfTimeDbContext.CampusBuildings.AnyAsync(b => b.Id == id))
+        var building = await _outOfTimeDbContext.CampusBuildings.FirstOrDefaultAsync(b => b.Id == id);
+        if (building is null)
             return Result.Fail(new RecordNotFoundException($"Campus building with id '{id}' not found"));
 
-        var entityToRemove = new Educator { Id = id };
-        _outOfTimeDbContext.Educators.Remove(entityToRemove);
+        _outOfTimeDbContext.CampusBuildings.Remove(building);
         await _outOfTimeDbContext.SaveChangesAsync();
 
         return Result.Success();

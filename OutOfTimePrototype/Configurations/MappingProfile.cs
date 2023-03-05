@@ -21,6 +21,8 @@ public class MappingProfile : Profile
 
         // Campus building
         CreateMap<CampusBuildingDto, CampusBuilding>().IgnoreNullProperties().IgnoreProperty(dto => dto.Id);
+        CreateMap<CampusBuildingCreateDto, CampusBuilding>().IgnoreNullProperties();
+        CreateMap<CampusBuildingEditDto, CampusBuilding>().IgnoreNullProperties().IgnoreProperty(dto => dto.Id);
 
         // Lecture hall
         CreateMap<LectureHallDto, LectureHall>().IgnoreNullProperties().IgnoreProperty(dto => dto.Id);
