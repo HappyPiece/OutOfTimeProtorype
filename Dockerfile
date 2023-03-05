@@ -15,4 +15,5 @@ ENV ASPNETCORE_HTTP_PORT=https://+:5001
 
 EXPOSE 5000
 
+#specify environment to configure swagger availability
 ENTRYPOINT ["dotnet", "OutOfTimePrototype.dll", "--environment=Development"]
