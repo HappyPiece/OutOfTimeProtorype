@@ -41,7 +41,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    [MinRoleAuthorize(Role.Root)]
+    [Authorize] [MinRoleAuthorize(Role.Root)]
     [Route("all")]
     public async Task<IActionResult> GetAllUsers()
     {
@@ -63,7 +63,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    [MinRoleAuthorize(Role.Admin)]
+    [Authorize] [MinRoleAuthorize(Role.Admin)]
     [Route("{id:guid}")]
     public async Task<IActionResult> GetUser([FromRoute] Guid id)
     {
@@ -103,7 +103,7 @@ public class UserController : ControllerBase
     }
 
     [HttpDelete]
-    [MinRoleAuthorize(Role.Admin)]
+    [Authorize] [MinRoleAuthorize(Role.Admin)]
     [Route("{id:guid}/delete")]
     public async Task<IActionResult> Delete([FromRoute] Guid id)
     {
@@ -112,7 +112,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    [MinRoleAuthorize(Role.Admin)]
+    [Authorize] [MinRoleAuthorize(Role.Admin)]
     [Route("{id:guid}/unverified")]
     public async Task<IActionResult> GetUnverifiedRoles(Guid id)
     {
@@ -124,7 +124,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPut]
-    [MinRoleAuthorize(Role.Admin)]
+    [Authorize] [MinRoleAuthorize(Role.Admin)]
     [Route("{id:guid}/verify")]
     public async Task<IActionResult> VerifyRole([FromRoute] Guid id, [FromQuery] Role role)
     {

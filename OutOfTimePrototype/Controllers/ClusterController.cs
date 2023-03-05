@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OutOfTimePrototype.Authorization;
 using OutOfTimePrototype.Dal.Models;
@@ -22,7 +23,7 @@ namespace OutOfTimePrototype.Controllers
             _clusterService = clusterService;
         }
 
-        [MinRoleAuthorize(Role.Admin)]
+        [Authorize] [MinRoleAuthorize(Role.Admin)]
         [HttpPost, Route("create")]
         public async Task<IActionResult> CreateCluster(ClusterDto clusterDto)
         {
@@ -53,7 +54,7 @@ namespace OutOfTimePrototype.Controllers
             return Ok();
         }
 
-        [MinRoleAuthorize(Role.Admin)]
+        [Authorize] [MinRoleAuthorize(Role.Admin)]
         [HttpPost, Route("{number}/edit")]
         public async Task<IActionResult> EditCluster(string number, ClusterEditDto clusterEditDto)
         {
@@ -95,7 +96,7 @@ namespace OutOfTimePrototype.Controllers
             return Ok();
         }
 
-        [MinRoleAuthorize(Role.Admin)]
+        [Authorize] [MinRoleAuthorize(Role.Admin)]
         [HttpDelete, Route("{number}/delete")]
         public async Task<IActionResult> DeleteCluster(string number)
         {

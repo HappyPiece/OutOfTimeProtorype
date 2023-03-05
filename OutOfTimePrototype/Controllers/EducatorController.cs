@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OutOfTimePrototype.Authorization;
 using OutOfTimePrototype.Dal.Models;
@@ -34,7 +35,7 @@ public class EducatorController : ControllerBase
     /// <param name="timeSlotNumber">The number of the class by time</param>
     /// <param name="date">The day on which free lectures are obtained</param>
     /// <remarks>This is a method for the bureau of schedules</remarks>
-    [MinRoleAuthorize(Role.ScheduleBureau)]
+    [Authorize] [MinRoleAuthorize(Role.ScheduleBureau)]
     [HttpGet("free_educ")]
     public async Task<IActionResult> GetUnoccupiedEducators([FromQuery] int timeSlotNumber, [FromQuery] DateTime date)
     {
@@ -43,7 +44,7 @@ public class EducatorController : ControllerBase
         return Ok(result);
     }
 
-    [MinRoleAuthorize(Role.Admin)]
+    [Authorize] [MinRoleAuthorize(Role.Admin)]
     [HttpPost("create")]
     public async Task<IActionResult> Create([FromBody] EducatorDto educatorDto)
     {
@@ -51,7 +52,7 @@ public class EducatorController : ControllerBase
         return NoContent();
     }
 
-    [MinRoleAuthorize(Role.Admin)]
+    [Authorize] [MinRoleAuthorize(Role.Admin)]
     [HttpPut("{id:guid}/edit")]
     public async Task<IActionResult> Edit(Guid id, [FromBody] EducatorDto educatorDto)
     {
@@ -62,7 +63,7 @@ public class EducatorController : ControllerBase
         );
     }
 
-    [MinRoleAuthorize(Role.Admin)]
+    [Authorize] [MinRoleAuthorize(Role.Admin)]
     [HttpDelete("{id:guid}/delete")]
     public async Task<IActionResult> Delete(Guid id)
     {

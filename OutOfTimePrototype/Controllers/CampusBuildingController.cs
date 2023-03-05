@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OutOfTimePrototype.Authorization;
 using OutOfTimePrototype.Dal.Models;
@@ -30,7 +31,7 @@ public class CampusBuildingController : ControllerBase
         return Ok(result);
     }
 
-    [MinRoleAuthorize(Role.Admin)]
+    [Authorize] [MinRoleAuthorize(Role.Admin)]
     [HttpPost("create")]
     public async Task<IActionResult> Create([FromBody] CampusBuildingDto campusBuildingDto)
     {
@@ -52,7 +53,7 @@ public class CampusBuildingController : ControllerBase
         );
     }
 
-    [MinRoleAuthorize(Role.Admin)]
+    [Authorize] [MinRoleAuthorize(Role.Admin)]
     [HttpPut("edit/{id:guid}")]
     public async Task<IActionResult> Edit(Guid id, [FromBody] CampusBuildingDto campusBuildingDto)
     {
@@ -63,7 +64,7 @@ public class CampusBuildingController : ControllerBase
         );
     }
 
-    [MinRoleAuthorize(Role.Admin)]
+    [Authorize] [MinRoleAuthorize(Role.Admin)]
     [HttpDelete("delete/{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
