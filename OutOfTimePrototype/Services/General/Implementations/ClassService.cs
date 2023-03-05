@@ -17,23 +17,25 @@ namespace OutOfTimePrototype.Services.General.Implementations
     {
         private readonly OutOfTimeDbContext _outOfTimeDbContext;
         private readonly IClusterService _clusterService;
+        private readonly IQueryable<Class> _classes;
 
         public ClassService(OutOfTimeDbContext outOfTimeDbContext, IClusterService clusterService)
         {
             _outOfTimeDbContext = outOfTimeDbContext;
             _clusterService = clusterService;
+            _classes = _outOfTimeDbContext.Classes
+                .Include(x => x.TimeSlot)
+                .Include(x => x.Cluster)
+                .Include(x => x.Educator)
+                .Include(x => x.LectureHall).ThenInclude(x => x.HostBuilding)
+                .Include(x => x.Type)
+                .Include(x => x.Subject)
+                .AsQueryable();
         }
 
         public async Task<ClassOperationResult> QueryClasses(ClassQueryDto classQueryDto)
         {
-            var classes = _outOfTimeDbContext.Classes
-                .Include(x => x.TimeSlot)
-                .Include(x => x.Cluster)
-                .Include(x => x.Educator)
-                .Include(x => x.LectureHall)
-                .Include(x => x.Type)
-                .Include(x => x.Subject)
-                .AsQueryable();
+            var classes = _classes;
 
             if (classQueryDto.StartDate is not null)
             {
@@ -342,14 +344,7 @@ namespace OutOfTimePrototype.Services.General.Implementations
 
         private async Task<ClassOperationResult> TryEditClass(Guid id, ClassEditDto classEditDto, bool nullMode = false, bool isTransactionUnit = false)
         {
-            Class? @class = await _outOfTimeDbContext.Classes
-                .Include(x => x.TimeSlot)
-                .Include(x => x.Cluster)
-                .Include(x => x.Educator)
-                .Include(x => x.LectureHall)
-                .Include(x => x.Type)
-                .Include(x => x.Subject)
-                .SingleOrDefaultAsync(x => x.Id == id);
+            Class? @class = await _classes.SingleOrDefaultAsync(x => x.Id == id);
 
             if (@class is null)
             {

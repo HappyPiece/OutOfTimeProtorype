@@ -7,7 +7,7 @@ namespace OutOfTimePrototype.Services.General.Interfaces;
 public interface ICampusBuildingService
 {
     public Task<List<CampusBuilding>> GetAll();
-    public Task<Result> Create(CampusBuildingDto campusBuildingDto);
-    public Task<Result> Edit(Guid id, CampusBuildingDto campusBuildingDto);
+    public Task<Result> Create(CampusBuildingCreateDto campusBuildingDto);
+    public Task<Result> Edit(Guid id, CampusBuildingEditDto campusBuildingDto);
     public Task<Result> Delete(Guid id);
 }

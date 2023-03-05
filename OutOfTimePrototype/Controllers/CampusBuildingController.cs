@@ -27,13 +27,13 @@ public class CampusBuildingController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var result = new { campusBuildings = await _campusBuildingService.GetAll() };
+        var result = (await _campusBuildingService.GetAll()).Select(x => new CampusBuildingDto(x));
         return Ok(result);
     }
 
     [Authorize] [MinRoleAuthorize(Role.Admin)]
     [HttpPost("create")]
-    public async Task<IActionResult> Create([FromBody] CampusBuildingDto campusBuildingDto)
+    public async Task<IActionResult> Create([FromBody] CampusBuildingCreateDto campusBuildingDto)
     {
         var result = await _campusBuildingService.Create(campusBuildingDto);
         
@@ -55,7 +55,7 @@ public class CampusBuildingController : ControllerBase
 
     [Authorize] [MinRoleAuthorize(Role.Admin)]
     [HttpPut("edit/{id:guid}")]
-    public async Task<IActionResult> Edit(Guid id, [FromBody] CampusBuildingDto campusBuildingDto)
+    public async Task<IActionResult> Edit(Guid id, [FromBody] CampusBuildingEditDto campusBuildingDto)
     {
         var result = await _campusBuildingService.Edit(id, campusBuildingDto);
         return result.Match<IActionResult>(
