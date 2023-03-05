@@ -94,12 +94,7 @@ services.AddAuthentication(options =>
     };
 });
 
-services.AddAuthorization(
-    options =>
-    {
-        options.AddPolicy("RequireRoot", policy => policy.RequireRole(new List<string>() { Role.Root.ToString() }));
-    }
-);
+services.AddAuthorization();
 
 // AutoMapper configuration
 var config = new MapperConfiguration(cfg => { cfg.AddProfile<MappingProfile>(); });
@@ -147,7 +142,7 @@ var logger = app.Services.GetRequiredService<ILogger<ExceptionMiddleware>>();
 app.ConfigureExceptionHandler(logger);
 app.ConfigureCustomExceptionMiddleware();
 
-app.AddEgorMiddleware();
+app.UseEgorMiddleware();
 
 app.MapControllers();
 

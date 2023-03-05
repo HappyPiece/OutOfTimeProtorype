@@ -13,6 +13,7 @@ using OutOfTimePrototype.Dto;
 using OutOfTimePrototype.Services.Interfaces;
 using OutOfTimePrototype.Authorization;
 using OutOfTimePrototype.Dal.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OutOfTimePrototype.Controllers
 {
@@ -29,7 +30,7 @@ namespace OutOfTimePrototype.Controllers
             _outOfTimeDbContext = outOfTimeDbContext;
         }
 
-        [MinRoleAuthorize(Role.ScheduleBureau)]
+        [Authorize] [MinRoleAuthorize(Role.ScheduleBureau)]
         [HttpPost, Route("create")]
         public async Task<IActionResult> CreateClass(ClassCreateDto ClassCreateDto)
         {
@@ -51,7 +52,7 @@ namespace OutOfTimePrototype.Controllers
         /// <param name="dayOfWeek"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        [MinRoleAuthorize(Role.ScheduleBureau)]
+        [Authorize] [MinRoleAuthorize(Role.ScheduleBureau)]
         [HttpPost, Route("create/on-day-of-week")]
         public async Task<IActionResult> CreateClasses(ClassCreateDto ClassCreateDto,
             [FromQuery] DateTime? startDate,
@@ -90,7 +91,7 @@ namespace OutOfTimePrototype.Controllers
         /// When false, null parameters are ignored.
         /// </param>
         /// <returns></returns>
-        [MinRoleAuthorize(Role.ScheduleBureau)]
+        [Authorize] [MinRoleAuthorize(Role.ScheduleBureau)]
         [HttpPost, Route("{id}/edit")]
         public async Task<IActionResult> EditClass(Guid id, ClassEditDto classEditDto, [FromQuery] bool nullMode = false)
         {
@@ -120,7 +121,7 @@ namespace OutOfTimePrototype.Controllers
         /// When true, query won't select classes that are set for sub- or superclusters.
         /// </param>
         /// <returns></returns>
-        [MinRoleAuthorize(Role.ScheduleBureau)]
+        [Authorize] [MinRoleAuthorize(Role.ScheduleBureau)]
         [HttpPost, Route("edit")]
         public async Task<IActionResult> EditClasses(ClassEditDto classEditDto,
             [FromQuery] DateTime? startDate,
@@ -152,7 +153,7 @@ namespace OutOfTimePrototype.Controllers
             return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
         }
 
-        [MinRoleAuthorize(Role.ScheduleBureau)]
+        [Authorize] [MinRoleAuthorize(Role.ScheduleBureau)]
         [HttpDelete, Route("{id}")]
         public async Task<IActionResult> DeleteClass([FromRoute] Guid id)
         {
@@ -161,7 +162,7 @@ namespace OutOfTimePrototype.Controllers
             return StatusCode(Convert.ToInt32(result.HttpStatusCode), result.Message);
         }
 
-        [MinRoleAuthorize(Role.ScheduleBureau)]
+        [Authorize] [MinRoleAuthorize(Role.ScheduleBureau)]
         [HttpDelete, Route("")]
         public async Task<IActionResult> DeleteClasses(
             [FromQuery] DateTime? startDate,
