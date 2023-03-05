@@ -1,5 +1,6 @@
 stages:
   - build
+  - trigger-deploy
   - deploy
 
 variables:
@@ -12,6 +13,12 @@ build-image:
     - docker
   stage: build
   when: manual
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - Dockerfile
+        - OutOfTimePrototype/**/*
+      when: always
   image: docker:23.0.1
   services:
     - docker:23.0.1-dind
@@ -28,7 +35,6 @@ deploy:
   tags:
     - deploy
   stage: deploy
-  when: manual
   before_script:
     - docker info
     - docker login -u $DOCKER_USER -p $DOCKER_PASS
