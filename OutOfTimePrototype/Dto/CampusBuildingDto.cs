@@ -10,7 +10,7 @@ public class CampusBuildingDto
 
     public string? Name { get; set; }
 
-    public List<LectureHallDto> LectureHalls { get; set; }
+    public List<Guid> LectureHallIds { get; set; } = new List<Guid>();
 
     public CampusBuildingDto()
     {
@@ -22,7 +22,7 @@ public class CampusBuildingDto
         Id = campusBuilding.Id;
         Address = campusBuilding.Address;
         Name = campusBuilding.Name;
-        LectureHalls = campusBuilding.LectureHalls.Select(x => new LectureHallDto(x)).ToList();
+        LectureHallIds = campusBuilding.LectureHalls.Select(x => x.Id).ToList();
     }
 }
 public class CampusBuildingCreateDto

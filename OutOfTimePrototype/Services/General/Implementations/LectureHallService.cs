@@ -20,6 +20,11 @@ public class LectureHallService : ILectureHallService
         _mapper = mapper;
     }
 
+    public async Task<List<LectureHall>> GetAll()
+    { 
+        return await _outOfTimeDbContext.LectureHalls.Include(x => x.HostBuilding).ToListAsync();
+    }
+
     public async Task<List<LectureHall>> GetAllUnoccupied(int timeSlotNumber, DateTime date)
     {
         var occupiedLectureHalls = await _outOfTimeDbContext.Classes.Where(@class =>
@@ -28,14 +33,14 @@ public class LectureHallService : ILectureHallService
             .Select(@class => @class.LectureHall)
             .ToListAsync();
 
-        return await _outOfTimeDbContext.LectureHalls.Where(hall => !occupiedLectureHalls.Contains(hall)).ToListAsync();
+        return await _outOfTimeDbContext.LectureHalls.Where(hall => !occupiedLectureHalls.Contains(hall)).Include(x => x.HostBuilding).ToListAsync();
     }
 
     // TODO: maybe need to return LectureHallDto
     public async Task<List<LectureHall>> GetByBuilding(Guid hostBuildingId)
     {
         return await _outOfTimeDbContext.LectureHalls.Where(hall => hall.HostBuilding.Id == hostBuildingId)
-            .ToListAsync();
+            .Include(x => x.HostBuilding).ToListAsync();
     }
 
     public async Task<Result> CreateLectureHall(LectureHallCreateDto hallDto)

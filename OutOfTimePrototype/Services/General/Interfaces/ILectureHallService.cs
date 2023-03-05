@@ -6,6 +6,7 @@ namespace OutOfTimePrototype.Services.Interfaces;
 
 public interface ILectureHallService
 {
+    Task<List<LectureHall>> GetAll();
     Task<List<LectureHall>> GetAllUnoccupied(int timeSlotNumber, DateTime date);
     Task<List<LectureHall>> GetByBuilding(Guid hostBuildingId);
     Task<Result> CreateLectureHall(LectureHallCreateDto hallDto);
