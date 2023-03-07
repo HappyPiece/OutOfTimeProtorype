@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using OutOfTimePrototype.Dal.Models;
+using OutOfTimePrototype.Dto;
 using static OutOfTimePrototype.Utilities.UserUtilities;
 
 namespace OutOfTimePrototype.Utilities
@@ -110,7 +111,7 @@ namespace OutOfTimePrototype.Utilities
                 {
                     case OperationStatus.Success:
                         if (userOperationResult.User is not null)
-                            return new OkObjectResult(userOperationResult.User);
+                            return new OkObjectResult(new UserDto(userOperationResult.User));
                         return new OkResult();
                     case OperationStatus.UserRegistered:
                         if (userOperationResult.User is not null)

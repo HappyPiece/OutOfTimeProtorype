@@ -20,9 +20,9 @@ public class SubjectService : ISubjectService
         _mapper = mapper;
     }
 
-    public async Task<List<SubjectDto>> GetAll()
+    public async Task<List<Subject>> GetAll()
     {
-        return await _outOfTimeDbContext.Subjects.Select(subject => _mapper.Map<SubjectDto>(subject)).ToListAsync();
+        return await _outOfTimeDbContext.Subjects.ToListAsync();
     }
 
     public async Task CreateSubject(SubjectDto subjectDto)

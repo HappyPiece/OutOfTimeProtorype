@@ -27,7 +27,7 @@ public class SubjectController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var subjects = await _subjectService.GetAll();
-        return Ok(subjects);
+        return Ok(subjects.Select(subject => new SubjectDto(subject)));
     }
 
     [Authorize]
@@ -42,7 +42,7 @@ public class SubjectController : ControllerBase
     [Authorize]
     [MinRoleAuthorize(Role.ScheduleBureau)]
     [HttpPut("edit/{id:guid}")]
-    public async Task<IActionResult> EditSubject([FromQuery] Guid id, [FromBody] SubjectDto subjectDto)
+    public async Task<IActionResult> EditSubject([FromRoute] Guid id, [FromBody] SubjectDto subjectDto)
     {
         var r = await _subjectService.EditSubject(id, subjectDto);
         return r.Match(NoContent, e => e is RecordNotFoundException ? NotFound() : StatusCode(500));
@@ -51,7 +51,7 @@ public class SubjectController : ControllerBase
     [Authorize]
     [MinRoleAuthorize(Role.ScheduleBureau)]
     [HttpPut("delete/{id:guid}")]
-    public async Task<IActionResult> DeleteSubject([FromQuery] Guid id)
+    public async Task<IActionResult> DeleteSubject([FromRoute] Guid id)
     {
         var r = await _subjectService.DeleteSubject(id);
         return r.Match(NoContent, e => e is RecordNotFoundException ? NotFound() : StatusCode(500));

@@ -95,9 +95,6 @@ public class UserController : ControllerBase
 
         if (ModelState.IsValid) return BadRequest(ModelState);
 
-        var userDtoModelState = userDto.Validate();
-        if (!userDtoModelState.IsValid) return BadRequest(userDtoModelState);
-
         var result = await _userService.EditUser(id, userDto);
         return UserUtilities.UserOperationResult.ToIActionResult(result);
     }
@@ -122,7 +119,7 @@ public class UserController : ControllerBase
             e => e is RecordNotFoundException ? NotFound(e.Message) : StatusCode(500)
         );
     }
-
+    
     [HttpPut]
     [Authorize] [MinRoleAuthorize(Role.Admin)]
     [Route("{id:guid}/verify")]

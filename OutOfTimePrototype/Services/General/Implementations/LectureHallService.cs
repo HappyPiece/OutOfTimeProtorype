@@ -21,7 +21,7 @@ public class LectureHallService : ILectureHallService
     }
 
     public async Task<List<LectureHall>> GetAll()
-    { 
+    {
         return await _outOfTimeDbContext.LectureHalls.Include(x => x.HostBuilding).ToListAsync();
     }
 
@@ -33,7 +33,8 @@ public class LectureHallService : ILectureHallService
             .Select(@class => @class.LectureHall)
             .ToListAsync();
 
-        return await _outOfTimeDbContext.LectureHalls.Where(hall => !occupiedLectureHalls.Contains(hall)).Include(x => x.HostBuilding).ToListAsync();
+        return await _outOfTimeDbContext.LectureHalls.Where(hall => !occupiedLectureHalls.Contains(hall))
+            .Include(x => x.HostBuilding).ToListAsync();
     }
 
     // TODO: maybe need to return LectureHallDto
@@ -83,11 +84,13 @@ public class LectureHallService : ILectureHallService
         CampusBuilding? newHost = null;
         if (hallUpdateDto.HostBuildingId != null)
         {
-            newHost = await _outOfTimeDbContext.CampusBuildings.FirstOrDefaultAsync(x => x.Id == hallUpdateDto.HostBuildingId);
+            newHost = await _outOfTimeDbContext.CampusBuildings.FirstOrDefaultAsync(x =>
+                x.Id == hallUpdateDto.HostBuildingId);
             if (newHost is null)
                 return new RecordNotFoundException(
                     $"Campus building with id: '{hallUpdateDto.HostBuildingId}' does not exists");
-            if (await SameHallExists(hallUpdateDto.Name ?? dbEntity.Name, hallUpdateDto.HostBuildingId ?? throw new ArgumentNullException()))
+            if (await SameHallExists(hallUpdateDto.Name ?? dbEntity.Name,
+                    hallUpdateDto.HostBuildingId ?? throw new ArgumentNullException()))
             {
                 var e = new AlreadyExistsException(
                     $"Lecture hall with name: '{hallUpdateDto.Name}' already exists in building '{hallUpdateDto.HostBuildingId}'");

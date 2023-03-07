@@ -35,11 +35,6 @@ namespace OutOfTimePrototype.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (!userDto.Validate().IsValid)
-            {
-                return BadRequest(new ValidationProblemDetails(userDto.Validate()));
-            }
-
             var result = await _userService.TryRegisterUser(userDto);
             if (result.Status != OperationStatus.UserRegistered)
             {
