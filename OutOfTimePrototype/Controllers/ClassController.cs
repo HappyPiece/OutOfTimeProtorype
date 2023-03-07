@@ -268,6 +268,7 @@ namespace OutOfTimePrototype.Controllers
                 .Include(x => x.Educator)
                 .Include(x => x.LectureHall)
                 .Include(x => x.Type)
+                .Include(x => x.Subject)
                 .SingleOrDefaultAsync(x => x.Id == id);
 
             if (@class is null)
