@@ -1,8 +1,11 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.DTO;
+using OutOfTimePrototype.Exceptions;
 using OutOfTimePrototype.Services.General.Interfaces;
+using OutOfTimePrototype.Utilities;
 
 namespace OutOfTimePrototype.Services.General.Implementations;
 
@@ -17,23 +20,51 @@ public class SubjectService : ISubjectService
         _mapper = mapper;
     }
 
-    public Subject GetAll()
+    public async Task<List<SubjectDto>> GetAll()
     {
-        throw new NotImplementedException();
+        return await _outOfTimeDbContext.Subjects.Select(subject => _mapper.Map<SubjectDto>(subject)).ToListAsync();
     }
 
-    public Task Create(SubjectDto subjectDto)
+    public async Task CreateSubject(SubjectDto subjectDto)
     {
-        throw new NotImplementedException();
+        var subject = new Subject
+        {
+            Name = subjectDto.Name
+        };
+
+        _outOfTimeDbContext.Subjects.Add(subject);
+        await _outOfTimeDbContext.SaveChangesAsync();
     }
 
-    public Task Update(Guid id, SubjectDto subjectDto)
+    public async Task<Result> EditSubject(Guid id, SubjectDto subjectDto)
     {
-        throw new NotImplementedException();
+        var dbSubject = await _outOfTimeDbContext.Subjects.FindAsync(id);
+
+        if (dbSubject is null)
+        {
+            return new RecordNotFoundException($"Subject with id '{id.ToString()}' not found");
+        }
+
+        var updatedEntity = _mapper.Map(subjectDto, dbSubject);
+
+        _outOfTimeDbContext.Subjects.Update(updatedEntity);
+        await _outOfTimeDbContext.SaveChangesAsync();
+
+        return Result.Success();
     }
 
-    public Task Delete(Guid id)
+    public async Task<Result> DeleteSubject(Guid id)
     {
-        throw new NotImplementedException();
+        var dbSubject = await _outOfTimeDbContext.Subjects.FindAsync(id);
+
+        if (dbSubject is null)
+        {
+            return new RecordNotFoundException($"Subject with id '{id.ToString()}' not found");
+        }
+
+        _outOfTimeDbContext.Subjects.Remove(dbSubject);
+        await _outOfTimeDbContext.SaveChangesAsync();
+
+        return Result.Success();
     }
 }

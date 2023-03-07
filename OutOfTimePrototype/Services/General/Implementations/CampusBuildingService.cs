@@ -64,7 +64,7 @@ public class CampusBuildingService : ICampusBuildingService
 
     public async Task<Result> Delete(Guid id)
     {
-        var building = await _outOfTimeDbContext.CampusBuildings.FirstOrDefaultAsync(b => b.Id == id);
+        var building = await _outOfTimeDbContext.CampusBuildings.FindAsync(id);
         if (building is null)
             return Result.Fail(new RecordNotFoundException($"Campus building with id '{id}' not found"));
 

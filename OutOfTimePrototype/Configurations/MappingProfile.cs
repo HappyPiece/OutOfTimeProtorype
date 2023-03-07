@@ -36,7 +36,10 @@ public class MappingProfile : Profile
         CreateMap<LectureHallUpdateDto, LectureHall>().IgnoreNullProperties();
 
         CreateMap<EducatorDto, Educator>().IgnoreNullProperties().IgnoreProperty(dto => dto.Id);
+        
         CreateMap<UserDto, User>().IgnoreNullProperties().IgnoreProperty(dto => dto.Id);
+
+        CreateMap<SubjectDto, Subject>();
     }
 }
 
