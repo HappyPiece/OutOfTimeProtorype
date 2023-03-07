@@ -144,4 +144,39 @@ public class UserController : ControllerBase
             }
         );
     }
+    
+    [HttpPut]
+    [Authorize] [MinRoleAuthorize(Role.Admin)]
+    [Route("{id:guid}/reject")]
+    public async Task<IActionResult> RejectRole([FromRoute] Guid id, [FromQuery] Role role)
+    {
+        var examinerRoles = ExtractRoles();
+
+        if (examinerRoles is null)
+            return BadRequest();
+
+        var result = await _userService.RejectUserRole(examinerRoles, id, role);
+        return result.Match<IActionResult>(
+            NoContent,
+            e =>
+            {
+                return e switch
+                {
+                    AccessNotAllowedException => Forbid(e.Message),
+                    RecordNotFoundException => NotFound(e.Message),
+                    _ => StatusCode(500)
+                };
+            }
+        );
+    }
+
+    [HttpGet]
+    [Authorize]
+    [MinRoleAuthorize(Role.Admin)]
+    [Route("unverified")]
+    public async Task<IActionResult> GetAllUsersWithUnverifiedRoles()
+    {
+        var result = await _userService.GetAllUsersWithUnverifiedRoles();
+        return Ok(result.Select(user => new UserDto(user)));
+    }
 }

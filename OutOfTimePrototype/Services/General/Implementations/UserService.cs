@@ -44,7 +44,7 @@ namespace OutOfTimePrototype.Services.General.Implementations
             {
                 return GenerateDefaultOperationResult(OperationStatus.NotFound, arg: id.ToString());
             }
-            
+
             if (userDto.Email != null && await _outOfTimeDbContext.Users.AnyAsync(user => user.Email == userDto.Email))
             {
                 return GenerateDefaultOperationResult(OperationStatus.EmailAlreadyInUse, userDto.Email);
@@ -144,23 +144,6 @@ namespace OutOfTimePrototype.Services.General.Implementations
             return GenerateDefaultOperationResult(OperationStatus.UserRegistered, user.Id.ToString());
         }
 
-        public async Task<Result> VerifyUserRole(List<Role> examinerRoles, Guid userToVerifyId, Role userRole)
-        {
-            if (!examinerRoles.Any(x => x.CanAssign(userRole)))
-                return new AccessNotAllowedException($"User with roles '{examinerRoles}' cannot perform this action");
-
-            var userToApprove = await GetUser(userToVerifyId);
-            if (userToApprove is null)
-                return new RecordNotFoundException($"User with id '{userToVerifyId.ToString()}' not found");
-
-            userToApprove.VerifiedRoles.Add(userRole);
-            userToApprove.ClaimedRoles.Remove(userRole);
-            _outOfTimeDbContext.Users.Update(userToApprove);
-            await _outOfTimeDbContext.SaveChangesAsync();
-
-            return Result.Success();
-        }
-
         public async Task<Result<List<Role>>> GetUnverifiedRoles(Guid id)
         {
             var user = await _outOfTimeDbContext.Users.FindAsync(id);
@@ -171,6 +154,44 @@ namespace OutOfTimePrototype.Services.General.Implementations
             }
 
             return user.ClaimedRoles;
+        }
+        
+        public async Task<Result> VerifyUserRole(List<Role> examinerRoles, Guid userId, Role userRoleToApprove)
+        {
+            if (!examinerRoles.Any(x => x.CanAssign(userRoleToApprove)))
+                return new AccessNotAllowedException($"User with roles '{examinerRoles}' cannot perform this action");
+
+            var userToApprove = await GetUser(userId);
+            if (userToApprove is null)
+                return new RecordNotFoundException($"User with id '{userId.ToString()}' not found");
+
+            userToApprove.VerifiedRoles.Add(userRoleToApprove);
+            userToApprove.ClaimedRoles.Remove(userRoleToApprove);
+            _outOfTimeDbContext.Users.Update(userToApprove);
+            await _outOfTimeDbContext.SaveChangesAsync();
+
+            return Result.Success();
+        }
+
+        public async Task<Result> RejectUserRole(List<Role> examinerRoles, Guid userId, Role userRoleToReject)
+        {
+            if (!examinerRoles.Any(x => x.CanAssign(userRoleToReject)))
+                return new AccessNotAllowedException($"User with roles '{examinerRoles}' cannot perform this action");
+            
+            var userToReject = await GetUser(userId);
+            if (userToReject is null)
+                return new RecordNotFoundException($"User with id '{userId.ToString()}' not found");
+
+            
+            userToReject.ClaimedRoles.Remove(userRoleToReject);
+            _outOfTimeDbContext.Users.Update(userToReject);
+            await _outOfTimeDbContext.SaveChangesAsync();
+            return Result.Success();
+        }
+
+        public async Task<List<User>> GetAllUsersWithUnverifiedRoles()
+        {
+            return await _outOfTimeDbContext.Users.Where(user => user.ClaimedRoles.Count != 0).ToListAsync();
         }
     }
 }

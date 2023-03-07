@@ -20,11 +20,15 @@ namespace OutOfTimePrototype.Services.General.Interfaces
         /// Method to verify user role by examiner  
         /// </summary>
         /// <param name="examinerRoles">Roles of examiner to check if he can perform verify action</param>
-        /// <param name="userToVerifyId">The user whose role is in the confirmation process</param>
-        /// <param name="userRole">User's role</param>
+        /// <param name="userId">The user whose role is in the confirmation process</param>
+        /// <param name="userRoleToApprove">User's role</param>
         /// <returns><c>Result</c> which represents Fail or Success states of method</returns>
         /// <remarks><c>Result</c> can contain either <see cref="AccessNotAllowedException"/> or
         /// <see cref="RecordNotFoundException"/></remarks>
-        Task<Result> VerifyUserRole(List<Role> examinerRoles, Guid userToVerifyId, Role userRole);
+        Task<Result> VerifyUserRole(List<Role> examinerRoles, Guid userId, Role userRoleToApprove);
+
+        Task<Result> RejectUserRole(List<Role> examinerRoles, Guid userId, Role userRoleToReject);
+
+        Task<List<User>> GetAllUsersWithUnverifiedRoles();
     }
-}
+}// verifying
