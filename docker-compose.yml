@@ -1,0 +1,41 @@
+version: '3.4'
+
+services:
+  app:
+    container_name: outoftime-app
+    image: happypiece/outoftime:latest
+    build: 
+      context: .
+    depends_on:
+      - db
+    ports:
+      - "0.0.0.0:5000:5000"
+    environment:
+      DB_CONNECTION_STRING: "host=database_host; port=5432; database=outoftime; username=outoftime; password=outoftime"
+      ASPNETCORE_HTTP_PORT: https://+:5001 
+      ASPNETCORE_URLS: http://+:5000
+    restart: always
+    networks: 
+      - app-network
+
+  db:
+    container_name: outoftime-db
+    hostname: database_host
+    image: postgres:latest
+    expose:
+      - "5432"
+    environment:
+      - POSTGRES_PASSWORD=outoftime
+      - POSTGRES_USER=outoftime
+      - POSTGRES_DB=outoftime
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    networks: 
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:

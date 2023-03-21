@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OutOfTimePrototype.DAL;
@@ -11,9 +12,11 @@ using OutOfTimePrototype.DAL;
 namespace OutOfTimePrototype.Migrations
 {
     [DbContext(typeof(OutOfTimeDbContext))]
-    partial class OutOfTimeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230222064959_Init")]
+    partial class Init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,9 +63,6 @@ namespace OutOfTimePrototype.Migrations
                     b.Property<Guid?>("LectureHallId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("SubjectId")
-                        .HasColumnType("uuid");
-
                     b.Property<int>("TimeSlotNumber")
                         .HasColumnType("integer");
 
@@ -76,8 +76,6 @@ namespace OutOfTimePrototype.Migrations
                     b.HasIndex("EducatorId");
 
                     b.HasIndex("LectureHallId");
-
-                    b.HasIndex("SubjectId");
 
                     b.HasIndex("TimeSlotNumber");
 
@@ -163,14 +161,14 @@ namespace OutOfTimePrototype.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("f718d1e0-f6ce-4c16-ba28-00ec621f0cce"),
+                            Id = new Guid("b567b9e6-4c7d-4a28-970c-e2462512de57"),
                             FirstName = "Educator",
                             LastName = "Educatorov",
                             MiddleName = "Educatorovich"
                         },
                         new
                         {
-                            Id = new Guid("878b71be-0f64-4893-a75a-1dd0205609d5"),
+                            Id = new Guid("74253563-1472-4fd8-9cc5-21e6120c8a45"),
                             FirstName = "Prepod",
                             LastName = "Prepodov",
                             MiddleName = "Prepodovich"
@@ -222,44 +220,44 @@ namespace OutOfTimePrototype.Migrations
                         new
                         {
                             Number = 1,
-                            EndTime = new DateTime(2023, 2, 24, 3, 20, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 24, 1, 45, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 22, 3, 20, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 22, 1, 45, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 2,
-                            EndTime = new DateTime(2023, 2, 24, 5, 10, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 24, 3, 35, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 22, 5, 10, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 22, 3, 35, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 3,
-                            EndTime = new DateTime(2023, 2, 24, 7, 0, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 24, 5, 25, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 22, 7, 0, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 22, 5, 25, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 4,
-                            EndTime = new DateTime(2023, 2, 24, 9, 20, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 24, 7, 45, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 22, 9, 20, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 22, 7, 45, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 5,
-                            EndTime = new DateTime(2023, 2, 24, 11, 10, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 24, 9, 35, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 22, 11, 10, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 22, 9, 35, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 6,
-                            EndTime = new DateTime(2023, 2, 24, 13, 0, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 24, 11, 25, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 22, 13, 0, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 22, 11, 25, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
                             Number = 7,
-                            EndTime = new DateTime(2023, 2, 24, 14, 50, 0, 0, DateTimeKind.Utc),
-                            StartTime = new DateTime(2023, 2, 24, 13, 15, 0, 0, DateTimeKind.Utc)
+                            EndTime = new DateTime(2023, 2, 22, 14, 50, 0, 0, DateTimeKind.Utc),
+                            StartTime = new DateTime(2023, 2, 22, 13, 15, 0, 0, DateTimeKind.Utc)
                         });
                 });
 
@@ -352,10 +350,6 @@ namespace OutOfTimePrototype.Migrations
                         .WithMany()
                         .HasForeignKey("LectureHallId");
 
-                    b.HasOne("OutOfTimePrototype.Dal.Models.Subject", "Subject")
-                        .WithMany()
-                        .HasForeignKey("SubjectId");
-
                     b.HasOne("OutOfTimePrototype.DAL.Models.TimeSlot", "TimeSlot")
                         .WithMany()
                         .HasForeignKey("TimeSlotNumber")
@@ -371,8 +365,6 @@ namespace OutOfTimePrototype.Migrations
                     b.Navigation("Educator");
 
                     b.Navigation("LectureHall");
-
-                    b.Navigation("Subject");
 
                     b.Navigation("TimeSlot");
 

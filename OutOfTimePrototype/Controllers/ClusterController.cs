@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OutOfTimePrototype.Authorization;
+using OutOfTimePrototype.Dal.Models;
 using OutOfTimePrototype.DAL;
 using OutOfTimePrototype.DAL.Models;
 using OutOfTimePrototype.DTO;
+using OutOfTimePrototype.Services.Interfaces;
 
 namespace OutOfTimePrototype.Controllers
 {
@@ -12,35 +15,38 @@ namespace OutOfTimePrototype.Controllers
     public class ClusterController : ControllerBase
     {
         private readonly OutOfTimeDbContext _outOfTimeDbContext;
+        private readonly IClusterService _clusterService;
 
-        public ClusterController(OutOfTimeDbContext outOfTimeDbContext)
+        public ClusterController(OutOfTimeDbContext outOfTimeDbContext, IClusterService clusterService)
         {
             _outOfTimeDbContext = outOfTimeDbContext;
+            _clusterService = clusterService;
         }
 
+        [Authorize] [MinRoleAuthorize(Role.Admin)]
         [HttpPost, Route("create")]
-        public async Task<IActionResult> CreateCluster(ClusterDTO clusterDTO)
+        public async Task<IActionResult> CreateCluster(ClusterDto clusterDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (await _outOfTimeDbContext.Clusters.AnyAsync(x => x.Number == clusterDTO.Number))
+            if (await _outOfTimeDbContext.Clusters.AnyAsync(x => x.Number == clusterDto.Number))
             {
                 return BadRequest("Cluster with such number already exists");
             }
 
-            if (clusterDTO.SuperClusterNumber != null)
-                if (!await _outOfTimeDbContext.Clusters.AnyAsync(x => x.Number == clusterDTO.SuperClusterNumber))
+            if (clusterDto.SuperClusterNumber != null)
+                if (!await _outOfTimeDbContext.Clusters.AnyAsync(x => x.Number == clusterDto.SuperClusterNumber))
                 {
                     return BadRequest("Cluster, specified as parent, doesn't exist");
                 }
 
             await _outOfTimeDbContext.AddAsync(new Cluster
             {
-                Number = clusterDTO.Number,
-                SuperCluster = await _outOfTimeDbContext.Clusters.SingleOrDefaultAsync(x => x.Number == clusterDTO.SuperClusterNumber)
+                Number = clusterDto.Number,
+                SuperCluster = await _outOfTimeDbContext.Clusters.SingleOrDefaultAsync(x => x.Number == clusterDto.SuperClusterNumber)
             });
 
             await _outOfTimeDbContext.SaveChangesAsync();
@@ -48,21 +54,22 @@ namespace OutOfTimePrototype.Controllers
             return Ok();
         }
 
+        [Authorize] [MinRoleAuthorize(Role.Admin)]
         [HttpPost, Route("{number}/edit")]
-        public async Task<IActionResult> EditCluster(string number, ClusterEditDTO clusterEditDTO)
+        public async Task<IActionResult> EditCluster(string number, ClusterEditDto clusterEditDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (number != clusterEditDTO.Number && await _outOfTimeDbContext.Clusters.AnyAsync(x => x.Number == clusterEditDTO.Number))
+            if (number != clusterEditDto.Number && await _outOfTimeDbContext.Clusters.AnyAsync(x => x.Number == clusterEditDto.Number))
             {
                 return BadRequest("Cluster with such number already exists");
             }
 
-            if (clusterEditDTO.SuperClusterNumber != null)
-                if (!await _outOfTimeDbContext.Clusters.AnyAsync(x => x.Number == clusterEditDTO.SuperClusterNumber))
+            if (clusterEditDto.SuperClusterNumber != null)
+                if (!await _outOfTimeDbContext.Clusters.AnyAsync(x => x.Number == clusterEditDto.SuperClusterNumber))
                 {
                     return BadRequest("Cluster, specified as parent, doesn't exist");
                 }
@@ -74,13 +81,13 @@ namespace OutOfTimePrototype.Controllers
             }
             else
             {
-                if (clusterEditDTO.Number != null)
+                if (clusterEditDto.Number != null)
                 {
-                    cluster.Number = clusterEditDTO.Number;
+                    cluster.Number = clusterEditDto.Number;
                 }
-                if (clusterEditDTO.SuperClusterNumber != null)
+                if (clusterEditDto.SuperClusterNumber != null)
                 {
-                    cluster.SuperCluster = await _outOfTimeDbContext.Clusters.SingleOrDefaultAsync(x => x.Number == clusterEditDTO.SuperClusterNumber);
+                    cluster.SuperCluster = await _outOfTimeDbContext.Clusters.SingleOrDefaultAsync(x => x.Number == clusterEditDto.SuperClusterNumber);
                 }
             }
 
@@ -89,6 +96,7 @@ namespace OutOfTimePrototype.Controllers
             return Ok();
         }
 
+        [Authorize] [MinRoleAuthorize(Role.Admin)]
         [HttpDelete, Route("{number}/delete")]
         public async Task<IActionResult> DeleteCluster(string number)
         {
@@ -112,9 +120,9 @@ namespace OutOfTimePrototype.Controllers
         {
             var clusters = await _outOfTimeDbContext.Clusters.ToListAsync();
 
-            var responce = clusters.Select(x => new ClusterDTO { Number = x.Number, SuperClusterNumber = x.SuperCluster?.Number });
+            var response = clusters.Select(x => new ClusterDto(x));
 
-            return Ok(responce);
+            return Ok(response);
         }
 
         [HttpGet, Route("{number}")]
@@ -126,7 +134,7 @@ namespace OutOfTimePrototype.Controllers
                 return NotFound("Cluster doesn't exist");
             }
 
-            return Ok(new ClusterDTO { Number = cluster.Number, SuperClusterNumber = cluster.SuperCluster?.Number });
+            return Ok(new ClusterDto(cluster));
         }
     }
 }

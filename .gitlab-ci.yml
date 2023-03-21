@@ -1,0 +1,51 @@
+stages:
+  - build
+  - trigger-deploy
+  - deploy
+
+variables:
+  IMAGE_NAME: happypiece/outoftime
+  IMAGE_TAG: latest
+
+build-image:
+  tags:
+    - build
+    - docker
+  stage: build
+  when: manual
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "push"
+      changes:
+        - Dockerfile
+        - OutOfTimePrototype/**/*
+      when: always
+  image: docker:23.0.1
+  services:
+    - docker:23.0.1-dind
+  before_script:
+    - docker info
+    - docker login -u $DOCKER_USER -p $DOCKER_PASS
+  script:
+    - echo 'Building docker image...'
+    - docker build -t $IMAGE_NAME:$IMAGE_TAG .
+    - docker push $IMAGE_NAME:$IMAGE_TAG
+    - echo 'Build completed'
+
+deploy:
+  tags:
+    - deploy
+  stage: deploy
+  before_script:
+    - docker info
+    - docker login -u $DOCKER_USER -p $DOCKER_PASS
+  script:
+    - echo 'Deploying project...'
+    - docker pull $IMAGE_NAME:$IMAGE_TAG
+    - docker container ls --filter name="outoftime*" -q | xargs docker stop | xargs docker container rm || true
+    - docker-compose up -d
+    - docker cp ./sql outoftime-db:/root
+    - docker exec outoftime-db bash -c \
+      "export ROOT_EMAIL=$(echo $ROOT_EMAIL) && export ROOT_PASS=$(echo $ROOT_PASS) && 
+      psql -U outoftime -f /root/sql/RootAdditionScript.sql -v ROOT_EMAIL=$ROOT_EMAIL -v ROOT_PASS=$ROOT_PASS"
+    - docker system prune -f
+    - echo 'Deploy completed'
